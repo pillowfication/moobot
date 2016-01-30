@@ -1,0 +1,30 @@
+{
+  "name": "moo",
+  "version": "1.0.0",
+  "description": "moo",
+  "author": {
+    "name": "Markus Tran",
+    "email": "thebluepillow@gmail.com",
+    "url": "http://pillowfication.com"
+  },
+  "homepage": "https://github.com/pillowfication/moo",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pillowfication/moo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pillowfication/moo/issues"
+  },
+  "main": "index.js",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "eslint-config-pf": "*"
+  },
+  "keywords": [
+    "pillow",
+    "moo",
+    "steambot"
+  ],
+  "license": "MIT"
+}
