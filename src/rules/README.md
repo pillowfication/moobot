@@ -6,9 +6,19 @@ See [chatRules](https://github.com/pillowfication/moo/blob/master/src/rules/chat
 
 Responds with `moo`.
 
+```
+moo
+-> moo: moo
+```
+
 ### ping (or !ping)
 
 Private message only. Responds with `pong`.
+
+```
+ping
+-> moo: pong
+```
 
 ### !note \<name\> \<data\>
 
@@ -26,4 +36,13 @@ If `<data>` is provided, it will create or update the note with name `<name>` wi
 -> moo: Note saved! (moo: I am a cow.)
 !note moo
 -> moo: I am a cow.
+```
+
+### !remi
+
+Responds with a random Danbooru link of Remilia Scarlet. Possible ratings are Safe, Questionable, and Explicit.
+
+```
+!remi
+-> moo: (Safe) https://danbooru.donmai.us/posts/2170001?tags=remilia_scarlet
 ```
