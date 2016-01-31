@@ -17,6 +17,8 @@
   },
   "main": "index.js",
   "dependencies": {
+    "lodash": "4.1.0",
+    "steam": "1.4.0"
   },
   "devDependencies": {
     "eslint-config-pf": "*"
