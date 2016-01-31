@@ -10,7 +10,7 @@ Responds with `moo`.
 
 Private message only. Responds with `pong`.
 
-### !note <name> <data>
+### !note \<name\> \<data\>
 
 If `<data>` is not provided, it will try to respond with the note with name `<name>`.
 
