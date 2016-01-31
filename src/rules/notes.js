@@ -10,7 +10,9 @@ var logger = require('../logger');
 var fileName = path.join(__dirname, '../../data/notes.json');
 
 // Create the file if it does not exist
-fs.writeFileSync(fileName, '{}', {flags: 'wx'});
+try {
+  fs.writeFileSync(fileName, '{}', {flag: 'wx'});
+} catch (err) {}
 
 function writeNote(name, note, cb) {
   jsonfile.readFile(fileName, function(err, data) {
