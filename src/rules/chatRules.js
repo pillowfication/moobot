@@ -10,11 +10,11 @@ var admins = require('./admins');
 // 'friend' - Inside a private chat
 // 'admin'  - Only for users specified in './admins.js'
 
-var rules = [
+module.exports = [
   {
     test: 'moo',
-    handler: function(respond) {
-      respond('moo');
+    handler: function(respond, sender) {
+      respond(sender === '76561198003461754' && Math.random() < 0.5 ? '/bullies Moritsune' : 'moo');
     }
   }, {
     level: 'friend',
@@ -23,7 +23,7 @@ var rules = [
       respond('pong');
     }
   }, {
-    test: /^[!/\\]note/,
+    test: /^[!/\\]note($|\s)/,
     handler: require('./notes')
   }, {
     level: 'admin',
@@ -35,7 +35,7 @@ var rules = [
   }
 ];
 
-function verify(rule, sender, message, chatType) {
+module.exports.verify = function(rule, sender, message, chatType) {
   // First check permissions
   if (rule.level) {
     if (rule.level === 'group' && chatType !== rule.level)
@@ -52,10 +52,7 @@ function verify(rule, sender, message, chatType) {
   if (_.isRegExp(rule.test))
     return rule.test.test(message);
   if (_.isFunction(rule.test))
-    return rule.test(message);
+    return rule.test(sender, message, chatType);
 
   return false;
-}
-
-module.exports = rules;
-module.exports.verify = verify;
+};

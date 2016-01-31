@@ -10,7 +10,7 @@ var steamClient = new Steam.SteamClient();
 var steamUser = new Steam.SteamUser(steamClient);
 var steamFriends = new Steam.SteamFriends(steamClient);
 
-var chatRules = require('./rules');
+var chatRules = require('./rules/chatRules');
 
 logger.info('Logging on...');
 steamClient.connect();
@@ -36,15 +36,41 @@ steamFriends.on('chatInvite', function(chatRoomID, chatRoomName, patronID) {
 steamFriends.on('message', function(source, message, type, chatter) {
   if (type === Steam.EChatEntryType.ChatMsg) {
     var sender = chatter || source;
-    logger.chats(source).info('%s: %s', steamFriends.personaStates[sender].player_name, message);
+    var chatType = chatter ? 'group' : 'friend';
+    var playerName = steamFriends.personaStates[sender].player_name;
+
+    if (chatType === 'group')
+      logger.chats(source).info('(%s) %s: %s', source, playerName, message, {
+        direction: 'received',
+        chatType: chatType,
+        from: sender,
+        from_group: source
+      });
+    else
+      logger.chats(source).info('%s: %s', playerName, message, {
+        direction: 'received',
+        chatType: chatType,
+        from: sender
+      });
 
     // Loop the rules
     chatRules.forEach(function(rule) {
-      if (chatRules.verify(rule, sender, message, chatter ? 'group' : 'friend')) {
+      if (chatRules.verify(rule, sender, message, chatType)) {
         rule.handler(function(message) {
           steamFriends.sendMessage(source, message, Steam.EChatEntryType.ChatMsg);
-          logger.chats(source).info('moo: %s', message);
-        }, sender, message);
+          if (chatType === 'group')
+            logger.chats(source).info('(%s) moo: %s', source, message, {
+              direction: 'sent',
+              chatType: chatType,
+              to: source
+            });
+          else
+            logger.chats(source).info('To %s: %s', playerName, message, {
+              direction: 'received',
+              chatType: chatType,
+              to: source
+            });
+        }, sender, message, chatType);
       }
     });
   }

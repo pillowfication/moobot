@@ -19,6 +19,7 @@
   "dependencies": {
     "jsonfile": "2.2.3",
     "lodash": "4.1.0",
+    "moment": "2.11.1",
     "steam": "1.4.0",
     "winston": "2.1.1"
   },
