@@ -6,9 +6,9 @@ See [chatRules](https://github.com/pillowfication/moo/blob/master/src/rules/chat
 
 Responds with `moo`.
 
-### ping
+### ping (or !ping)
 
-Responds with `pong`.
+Private message only. Responds with `pong`.
 
 ### !note <name> <data>
 

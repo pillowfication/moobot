@@ -18,7 +18,7 @@ module.exports = [
     }
   }, {
     level: 'friend',
-    test: /^[!/\\]ping$/,
+    test: /^[!/\\]?ping$/,
     handler: function(respond) {
       respond('pong');
     }
@@ -27,7 +27,7 @@ module.exports = [
     handler: require('./notes')
   }, {
     level: 'admin',
-    test: /^[!/\\]die$/,
+    test: /^[!/\\]die$/i,
     handler: function() {
       logger.warn('Logging off...');
       process.exit();
