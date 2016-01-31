@@ -17,9 +17,10 @@
   },
   "main": "index.js",
   "dependencies": {
+    "jsonfile": "2.2.3",
     "lodash": "4.1.0",
     "steam": "1.4.0",
-    "winston": "^2.1.1"
+    "winston": "2.1.1"
   },
   "devDependencies": {
     "eslint-config-pf": "*"

@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(sender, message) {
-  return message;
+module.exports = function(respond, sender, message) {
+  respond(message);
 };

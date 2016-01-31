@@ -1,2 +1,5 @@
 node_modules/
+data/
+logs/
 *.log
+src/config.js

@@ -2,6 +2,6 @@
 
 module.exports = {
   api_key: undefined,
-  username: undefined,
-  password: undefined
+  username: 'moofication',
+  password: 'l000lll0l0l'
 };

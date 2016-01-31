@@ -9,28 +9,30 @@ var userLoggers = {};
 // Main logger
 module.exports = new winston.Logger({
   transports: [
-    new winston.transports.Console(),
+    new winston.transports.Console({
+      colorize: true
+    }),
     new winston.transports.File({
       filename: mainLog
     })
   ],
   levels: {
-    success: 0,
-    info: 0,
-    warn: 0,
-    error: 0
-  },
-  colors: {
-    success: 'green',
-    info: 'white',
-    warn: 'yellow',
-    error: 'red'
+    error: 0,
+    warn: 1,
+    success: 2,
+    info: 3
   }
+});
+winston.addColors({
+  error: 'red',
+  warn: 'yellow',
+  success: 'green',
+  info: 'white'
 });
 
 // Loggers for individual chats
 module.exports.chats = function(steamID) {
-  return userLoggers[steamID] || (userLoggers.steamID =
+  return userLoggers[steamID] || (userLoggers[steamID] =
     new winston.Logger({
       transports: [
         new winston.transports.Console(),
