@@ -29,6 +29,9 @@ module.exports = [
     test: /^[!/\\]note($|\s)/,
     handler: require('./notes')
   }, {
+    test: /^[!/\\]remi$/,
+    handler: require('./remi')
+  }, {
     level: 'admin',
     test: /^[!/\\]name($|\s)/,
     handler: function(respond, sender, message) {

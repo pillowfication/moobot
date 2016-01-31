@@ -3,5 +3,9 @@
 module.exports = {
   api_key: undefined,
   username: undefined,
-  password: undefined
+  password: undefined,
+  danbooru: {
+    api_key: undefined,
+    username: undefined
+  }
 };
