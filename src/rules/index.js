@@ -8,5 +8,8 @@ module.exports = [
     level: 'friend',
     test: /^ping$/,
     handler: 'pong'
+  }, {
+    test: /^[!/\\]note/,
+    handler: require('./notes')
   }
 ];

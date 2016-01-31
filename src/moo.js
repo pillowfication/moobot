@@ -11,7 +11,7 @@ var steamClient = new Steam.SteamClient();
 var steamUser = new Steam.SteamUser(steamClient);
 var steamFriends = new Steam.SteamFriends(steamClient);
 
-var chatRules = require('./chatRules');
+var chatRules = require('./rules');
 
 steamClient.connect();
 steamClient.on('connected', function() {
@@ -23,7 +23,7 @@ steamClient.on('connected', function() {
 
 steamClient.on('logOnResponse', function(logonRes) {
   if (logonRes.eresult === Steam.EResult.OK) {
-    logger.log('info', 'Successfully logged on ' + username);
+    logger.log('success', 'Successfully logged on ' + username);
     steamFriends.setPersonaState(Steam.EPersonaState.Online);
   }
 });
@@ -37,10 +37,12 @@ steamFriends.on('message', function(source, message, type, chatter) {
   if (type === Steam.EChatEntryType.ChatMsg) {
     var sender = _.get(steamFriends.personaStates, (chatter || source)+'.player_name', '('+source+')');
     logger.chats(source).log('info', '%s: %s', sender, message);
+
+    // Loop the rules
     chatRules.forEach(function(rule) {
       if (!rule.level || rule.level === 'friend' && !chatter || rule.level === 'group' && chatter)
         if (rule.test.test(message)) {
-          var response = _.isFunction(rule.handler) ? rule.handler() : rule.handler;
+          var response = _.isFunction(rule.handler) ? rule.handler(chatter || source, message) : rule.handler;
           steamFriends.sendMessage(source, response, Steam.EChatEntryType.ChatMsg);
           logger.chats(source).log('info', 'moo: %s', response);
         }
