@@ -34,7 +34,7 @@ function readNote(name, cb) {
 }
 
 module.exports = function(respond, sender, message) {
-  var args = parser(message.trim());
+  var args = parser(message);
   if (!args[1]) {
     respond('Invalid use of !note');
     return;

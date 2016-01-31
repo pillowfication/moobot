@@ -3,6 +3,9 @@
 var _ = require('lodash');
 var logger = require('../logger');
 var admins = require('./admins');
+var parser = require('./parser');
+
+var steamFriends = require('../steam-client').steamFriends;
 
 // Levels
 // <none>   - Applies anywhere and for all players
@@ -25,6 +28,21 @@ module.exports = [
   }, {
     test: /^[!/\\]note($|\s)/,
     handler: require('./notes')
+  }, {
+    level: 'admin',
+    test: /^[!/\\]name($|\s)/,
+    handler: function(respond, sender, message) {
+      var args = parser(message);
+      if (!args[1]) {
+        respond('Invalid use of !note');
+        return;
+      }
+
+      var name = args[1];
+
+      steamFriends.setPersonaName(name);
+      logger.warn('Name changed to: ' + name);
+    }
   }, {
     level: 'admin',
     test: /^[!/\\]die$/i,

@@ -1,14 +1,15 @@
 'use strict';
 
 var Steam = require('steam');
+var SteamClient = require('./steam-client');
 var config = require('./config');
 var username = process.argv[2] || config.username;
 var password = process.argv[3] || config.password;
 var logger = require('./logger');
 
-var steamClient = new Steam.SteamClient();
-var steamUser = new Steam.SteamUser(steamClient);
-var steamFriends = new Steam.SteamFriends(steamClient);
+var steamClient = SteamClient.steamClient;
+var steamUser = SteamClient.steamUser;
+var steamFriends = SteamClient.steamFriends;
 
 var chatRules = require('./rules/chatRules');
 
@@ -23,8 +24,8 @@ steamClient.on('connected', function() {
 
 steamClient.on('logOnResponse', function(logonRes) {
   if (logonRes.eresult === Steam.EResult.OK) {
-    logger.success('Logged on ' + username);
     steamFriends.setPersonaState(Steam.EPersonaState.Online);
+    logger.success('Logged on ' + username);
   }
 });
 
