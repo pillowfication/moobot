@@ -1,3 +1,4 @@
 'use strict';
 
-module.exports = require('./src/moo');
+var bot = require('./src/bot');
+bot.start();
