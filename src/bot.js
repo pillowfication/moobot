@@ -62,7 +62,7 @@ module.exports.start = function() {
         if (chatRules.verify(rule, sender, message, chatType)) {
           rule.handler(function(message) {
             sendMessage(source, message, chatType, playerName);
-          }, sender, message, chatType);
+          }, sender, message, chatType, chatType === 'group' ? source : undefined);
         }
       });
     }
