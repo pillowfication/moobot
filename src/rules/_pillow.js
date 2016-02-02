@@ -18,9 +18,9 @@ module.exports = {
     }
 
     var senderName = _.get(steamFriends, 'personaStates['+sender+'].player_name', '<'+sender+'>');
-    var recipientName = _.get(steamFriends, 'personaStates['+Pillowfication+'].player_name', '<Pillowfication>');
+    var recipientName = _.get(steamFriends, 'personaStates['+Pillowfication+'].player_name', 'Pillowfication');
 
-    sendMessage(Pillowfication, 'From '+senderName+': '+message, 'friend', '<Pillowfication>');
+    sendMessage(Pillowfication, 'From '+senderName+': '+message, 'friend', 'Pillowfication');
     respond('To '+recipientName+': '+message);
   }
 };
