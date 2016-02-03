@@ -56,7 +56,7 @@ If `<data>` is provided, it will create or update the note with name `<name>` wi
 -> moo: I am a cow.
 ```
 
-### [!remi <\rating\>](https://github.com/pillowfication/moo/blob/master/src/rules/_remi.js)
+### [!remi \<rating\>](https://github.com/pillowfication/moo/blob/master/src/rules/_remi.js)
 
 Responds with a random Danbooru link of Remilia Scarlet. If `<rating>` is provided, it will filter to that rating. Possible ratings are Safe (s), Questionable (q), and Explicit (e).
 
