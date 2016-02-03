@@ -16,6 +16,7 @@ module.exports = adminRules.concat([
   require('./_moo'),
   require('./_ping'),
   require('./_help'),
+  require('./_cleverbot'),
   require('./_note'),
   require('./_remi'),
   require('./_pillow')

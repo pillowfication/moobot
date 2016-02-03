@@ -17,6 +17,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "cleverbot.io": "^1.0.4",
     "jsonfile": "2.2.3",
     "lodash": "4.1.0",
     "moment": "2.11.1",
