@@ -1,7 +1,9 @@
 # Rules
 
  - [`moo`](#moo)
+ - [`moo, <message>`](#moo-message)
  - [`ping`](#ping-or-ping)
+ - [`!help`](#help)
  - [`!note <name> <data>`](#note-name-data)
  - [`!remi`](#remi-rating)
  - [`!pillow <message>`](#pillow-message)
@@ -18,6 +20,15 @@ Responds with `moo`.
 ```
 moo
 -> moo: moo
+```
+
+### [moo, \<message\>](https://github.com/pillowfication/moo/blob/master/src/rules/_cleverbot.js)
+
+Responds to your message using the [Cleverbot.io](https://cleverbot.io/) API. I have no idea what it might say.
+
+```
+moo, How are you?
+-> moo: It doesn't matter, and you?
 ```
 
 ### [ping (or !ping)](https://github.com/pillowfication/moo/blob/master/src/rules/_ping.js)
