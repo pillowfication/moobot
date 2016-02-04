@@ -5,7 +5,7 @@
  - [`ping`](#ping-or-ping)
  - [`!help`](#help)
  - [`!note <name> <data>`](#note-name-data)
- - [`!remi`](#remi-rating)
+ - [`!remi <rating>`](#remi-rating)
  - [`!pillow <message>`](#pillow-message)
 
 **admin stuffs**: `!name <name>`, `!send <user> <message>`, `!send-group <group> <message>`, `!sleep`, `!wake-up`,
