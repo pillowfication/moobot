@@ -4,8 +4,8 @@ var _ = require('lodash');
 var Steam = require('steam');
 var SteamClient = require('./steam-client');
 var config = require('./config');
-var username = process.argv[2] || config.username;
-var password = process.argv[3] || config.password;
+var username = process.argv[2] || config.steam.username;
+var password = process.argv[3] || config.steam.password;
 var logger = require('./logger');
 
 var steamClient = SteamClient.steamClient;

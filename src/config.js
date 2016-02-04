@@ -1,9 +1,15 @@
 'use strict';
 
 module.exports = {
-  api_key: undefined,
-  username: undefined,
-  password: undefined,
+  steam: {
+    api_key: undefined,
+    username: undefined,
+    password: undefined
+  },
+  cleverbot: {
+    api_key: undefined,
+    username: undefined
+  },
   danbooru: {
     api_key: undefined,
     username: undefined
