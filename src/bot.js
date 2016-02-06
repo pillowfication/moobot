@@ -28,12 +28,12 @@ module.exports.start = function() {
   steamClient.on('logOnResponse', function(logonRes) {
     if (logonRes.eresult === Steam.EResult.OK) {
       steamFriends.setPersonaState(Steam.EPersonaState.Online);
-      logger.success('Logged on ' + username);
+      logger.success('Logged on %s', username);
     }
   });
 
   steamFriends.on('chatInvite', function(chatRoomID, chatRoomName, patronID) {
-    logger.warn('Invited to ' + chatRoomName + ' by ' + steamFriends.personaStates[patronID].player_name);
+    logger.warn('Invited to %s by %s', chatRoomName, _.get(steamFriends, 'personaStates['+patronID+'].player_name', '<'+patronID+'>'));
     steamFriends.joinChat(chatRoomID);
   });
 

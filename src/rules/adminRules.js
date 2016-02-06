@@ -23,13 +23,12 @@ module.exports = [
     level: 'admin',
     test: /^[!/\\]name($|\s)/,
     handler: function(respond, sender, message) {
-      var args = parser(message);
-      if (!args[1]) {
+      var name = parser(message)[1];
+      if (!name) {
         respond('Invalid use of !name');
         return;
       }
 
-      var name = args[1];
       steamFriends.setPersonaName(name);
       logger.warn('Name changed to: ' + name);
     }
@@ -39,12 +38,12 @@ module.exports = [
     test: /^[!/\\]send($|\s)/,
     handler: function(respond, sender, _message) {
       var args = parser(_message);
-      if (!args[1] || !args[2]) {
+      var recipient = args[1], message = args[2];
+      if (!recipient || !message) {
         respond('Invalid use of !send');
         return;
       }
 
-      var recipient = args[1], message = args[2];
       var recipientName = _.get(steamFriends, 'personaStates['+recipient+'].player_name', '<'+recipient+'>');
       steamFriends.sendMessage(recipient, message, Steam.EChatEntryType.ChatMsg);
       respond('To '+recipientName+': '+message);
@@ -60,12 +59,12 @@ module.exports = [
     test: /^[!/\\]send-group($|\s)/,
     handler: function(respond, sender, _message) {
       var args = parser(_message);
-      if (!args[1] || !args[2]) {
-        respond('Invalid use of !sendGroup');
+      var recipient = args[1], message = args[2];
+      if (!recipient || !message) {
+        respond('Invalid use of !send-group');
         return;
       }
 
-      var recipient = args[1], message = args[2];
       steamFriends.sendMessage(recipient, message, Steam.EChatEntryType.ChatMsg);
       respond('To '+recipient+': '+message);
       logger.chats(recipient).info('(%s) moo: %s', recipient, message, {
@@ -73,6 +72,20 @@ module.exports = [
         chatType: 'group',
         to: recipient
       });
+    }
+  }, {
+    // Join a group chat room
+    level: 'admin',
+    test: /^[!/\\]join-chat($|\s)/,
+    handler: function(respond, sender, _message) {
+      var chatRoom = parser(_message)[1];
+      if (!chatRoom) {
+        respond('Invalid use of !join-chat');
+        return;
+      }
+
+      logger.warn('Invited to %s by %s', chatRoom, _.get(steamFriends, 'personaStates['+sender+'].player_name', '<'+sender+'>'));
+      steamFriends.joinChat(chatRoom);
     }
   }, {
     // Temporarily pause the bot
