@@ -8,7 +8,7 @@
  - [`!remi <rating>`](#remi-rating)
  - [`!pillow <message>`](#pillow-message)
 
-**admin stuffs**: `!name <name>`, `!send <user> <message>`, `!send-group <group> <message>`, `!sleep`, `!wake-up`,
+**admin stuffs**: `!name <name>`, `!send <user> <message>`, `!send-group <group> <message>`, `!join-chat <group>`, `!sleep`, `!wake-up`,
 `!die`
 
 ___
