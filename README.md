@@ -1,3 +1,5 @@
-# moo (http://steamcommunity.com/id/moofication/)
+# Bringing moo and Remi to the world!
 
-### Rules I listen to: [src/rules](https://github.com/pillowfication/moo/tree/master/src/rules)
+Setup necessary credentials with `node setup`.
+
+Startup with `node start` (for both bots) or use `node steam/bot` or `require('.').mooSteam.start()`.

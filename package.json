@@ -1,6 +1,6 @@
 {
   "name": "moo",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "moo",
   "author": {
     "name": "Markus Tran",
@@ -18,12 +18,11 @@
   "main": "index.js",
   "dependencies": {
     "cleverbot.io": "1.0.4",
-    "jsonfile": "2.2.3",
-    "lodash": "4.1.0",
-    "moment": "2.11.1",
-    "steam": "1.4.0",
-    "superagent": "1.7.2",
-    "winston": "2.1.1"
+    "express": "^4.14.0",
+    "jsonfile": "2.4.0",
+    "prompt": "1.0.0",
+    "request": "2.75.0",
+    "steam": "1.4.0"
   },
   "devDependencies": {
     "eslint-config-pf": "*"
@@ -31,7 +30,8 @@
   "keywords": [
     "pillow",
     "moo",
-    "steambot"
+    "steambot",
+    "discordbot"
   ],
   "license": "MIT"
 }

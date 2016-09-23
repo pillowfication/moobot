@@ -1,4 +1,2 @@
-node_modules/
-data/
-logs/
-*.log
+/node_modules
+/shared/config.json
