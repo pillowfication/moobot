@@ -7,7 +7,7 @@ bots.mooDiscord.start();
 
 const dumbCounter = require('./shared/dumbCounter')
 
-app.get('/', (req, res) => {
+app.get('/moo', (req, res) => {
   res.send(`<h1 style="text-align:center">There have been ${dumbCounter.count()} moos</h1>`);
 });
 

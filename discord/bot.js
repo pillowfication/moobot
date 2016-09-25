@@ -10,7 +10,7 @@ const rules = [
 
 client.on('ready', () => {
   console.log('moo (Discord) is online!');
-  client.user.setStatus('online', 'moo');
+  client.user.setStatus('online', 'pf-n.co/moo');
 });
 
 client.on('message', (message) => {
