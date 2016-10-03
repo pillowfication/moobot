@@ -10,8 +10,8 @@ const steamEnv = {
   friends: steamFriends
 };
 const rules = [
-  require('./rules/moo'),
-  require('./rules/remi')
+  require('./rules/moo')
+  // require('./rules/remi')
 ];
 
 steamClient.on('connected', () => {

@@ -3,9 +3,9 @@ const client = new Discord.Client();
 const config = require('../shared/config.json');
 
 const rules = [
-  require('./rules/moo'),
-  require('./rules/remi'),
-  require('./rules/talk'),
+  require('./rules/moo')
+  // require('./rules/remi')
+  // require('./rules/talk')
 ];
 
 client.on('ready', () => {

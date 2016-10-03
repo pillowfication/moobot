@@ -17,12 +17,14 @@
   },
   "main": "index.js",
   "dependencies": {
-    "cleverbot.io": "1.0.4",
-    "express": "^4.14.0",
-    "jsonfile": "2.4.0",
-    "prompt": "1.0.0",
-    "request": "2.75.0",
-    "steam": "1.4.0"
+    "cleverbot.io": "1.0.x",
+    "express": "4.14.x",
+    "jsonfile": "2.4.x",
+    "lodash": "^4.16.2",
+    "mongoose": "4.6.x",
+    "prompt": "1.0.x",
+    "request": "2.75.x",
+    "steam": "1.4.x"
   },
   "devDependencies": {
     "eslint-config-pf": "*"

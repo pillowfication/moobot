@@ -8,24 +8,25 @@ let schema = [{
   description: 'Steam Username'
 }, {
   name: 'steamPassword',
-  description: 'Steam Password',
-  hidden: true,
-  replace: '*'
+  description: 'Steam Password'
+}, {
+  name: 'steamApi',
+  description: 'Steam API Key (For web leaderboards)'
 }, {
   name: 'discordToken',
   description: 'Discord Bot Token'
 }, {
   name: 'cleverbotUsername',
-  description: 'Cleverbot Username (This is for cleverbot integration)'
+  description: 'Cleverbot Username (For cleverbot integration)'
 }, {
   name: 'cleverbotApi',
-  description: 'Cleverbot API Key  (This is for cleverbot integration)'
+  description: 'Cleverbot API Key  (For cleverbot integration)'
 }, {
   name: 'danbooruUsername',
-  description: 'Danbooru Username (This is for the `!remi` command)'
+  description: 'Danbooru Username (For the `!remi` command)'
 }, {
   name: 'danbooruApi',
-  description: 'Danbooru API Key  (This is for the `!remi` command)'
+  description: 'Danbooru API Key  (For the `!remi` command)'
 }];
 
 prompt.start();

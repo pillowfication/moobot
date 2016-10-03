@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>moo</title>
+  <script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
+  <script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
+  <script src="https://unpkg.com/babel-core@5.8.38/browser.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.1.0/dist/jquery.min.js"></script>
+</head>
+
+<body>
+  <div id="content"></div>
+  <script type="text/babel">
+    var Moos = React.createClass({
+      getInitialState: function() {
+        return {moos: undefined};
+      },
+      componentDidMount: function() {
+        var _this = this;
+        (function doQuery() {
+          jQuery.ajax('/api/total').done(function(res) {
+            _this.setState({moos: res.total});
+          });
+          setTimeout(doQuery, 60000);
+        })();
+      },
+      render: function() {
+        return (
+          <div>
+            <h1>There have been {this.state.moos || '...'} moos</h1>
+          </div>
+        );
+      }
+    });
+    var Leaderboards = React.createClass({
+      getInitialState: function() {
+        return {cows: undefined};
+      },
+      componentDidMount: function() {
+        var _this = this;
+        (function doQuery() {
+          jQuery.ajax('/api/steamLeaderboards')
+            .done(function(res) {
+              _this.setState({cows: res.cows});
+            });
+          setTimeout(doQuery, 60000);
+        })();
+      },
+      render: function() {
+        if (!this.state.cows)
+          return <div><h3>Loading...</h3></div>;
+
+        return (
+          <div>
+            <h3>Steam Leaderboards</h3>
+            <table>
+              <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Moos</th>
+              </tr>
+              {this.state.cows.map(function(cow, index) {
+                return (
+                  <tr>
+                    <td>{index}.</td>
+                    <td><a href={cow.steamUrl}>{cow.username}</a></td>
+                    <td>{cow.moos}</td>
+                  </tr>
+                );
+              })}
+            </table>
+          </div>
+        );
+      }
+    });
+
+    ReactDOM.render(
+      <div>
+        <Moos/>
+        <Leaderboards/>
+      </div>,
+      document.getElementById('content'));
+  </script>
+</body>
+</html>

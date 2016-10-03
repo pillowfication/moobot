@@ -1,5 +1,5 @@
 const Steam = require('steam');
-const dumbCounter = require('../../shared/dumbCounter');
+const database = require('../../shared/database');
 
 const test = RegExp.prototype.test.bind(/\b(moo+(s|ed|ing)?|cow(s|like)?|kine|bovin(e|ely|ity))\b/i);
 const prob = .2;
@@ -9,10 +9,15 @@ module.exports = function moo(steamEnv, source, message, type, chatter) {
   if (!test(message))
     return;
 
-  dumbCounter.moo();
+  if (Math.random() < prob)
+    if (Math.random() < MOOprob) {
+      steamEnv.friends.sendMessage(source, 'MOO', Steam.EChatEntryType.ChatMsg);
+      database.incrementById('Steam', chatter, 500, (err) => { /* what errors */ });
+    } else {
+      steamEnv.friends.sendMessage(source, 'moo', Steam.EChatEntryType.ChatMsg);
+      database.incrementById('Steam', chatter, 2, (err) => { /* what errors */ });
+    }
 
-  if (Math.random() < prob) {
-    steamEnv.friends.sendMessage(source, Math.random() < MOOprob ? 'MOO' : 'moo', Steam.EChatEntryType.ChatMsg);
-    dumbCounter.moo();
-  }
+  else
+    database.incrementById('Steam', chatter, 1, (err) => { /* what errors */ });
 };
