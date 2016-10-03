@@ -33,7 +33,8 @@
         );
       }
     });
-    var Leaderboards = React.createClass({
+
+    var SteamLeaderboards = React.createClass({
       getInitialState: function() {
         return {cows: undefined};
       },
@@ -49,12 +50,12 @@
       },
       render: function() {
         if (!this.state.cows)
-          return <div><h3>Loading...</h3></div>;
+          return <div><h3>Steam Leaderboards</h3><b>Loading...</b></div>;
 
         return (
           <div>
             <h3>Steam Leaderboards</h3>
-            <table>
+            <table><tbody>
               <tr>
                 <th>#</th>
                 <th>User</th>
@@ -62,14 +63,56 @@
               </tr>
               {this.state.cows.map(function(cow, index) {
                 return (
-                  <tr>
+                  <tr key={index}>
                     <td>{index}.</td>
                     <td><a href={cow.steamUrl}>{cow.username}</a></td>
                     <td>{cow.moos}</td>
                   </tr>
                 );
               })}
-            </table>
+            </tbody></table>
+          </div>
+        );
+      }
+    });
+
+    var DiscordLeaderboards = React.createClass({
+      getInitialState: function() {
+        return {cows: undefined};
+      },
+      componentDidMount: function() {
+        var _this = this;
+        (function doQuery() {
+          jQuery.ajax('/api/discordLeaderboards')
+            .done(function(res) {
+              _this.setState({cows: res.cows});
+            });
+          setTimeout(doQuery, 60000);
+        })();
+      },
+      render: function() {
+        if (!this.state.cows)
+          return <div><h3>Discord Leaderboards</h3><b>Loading...</b></div>;
+
+        return (
+          <div>
+            <h3>Discord Leaderboards</h3>
+            <table><tbody>
+              <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Moos</th>
+              </tr>
+              {this.state.cows.map(function(cow, index) {
+                return (
+                  <tr key={index}>
+                    <td>{index}.</td>
+                    <td>{cow.userId}</td>
+                    <td>{cow.moos}</td>
+                  </tr>
+                );
+              })}
+            </tbody></table>
           </div>
         );
       }
@@ -78,7 +121,8 @@
     ReactDOM.render(
       <div>
         <Moos/>
-        <Leaderboards/>
+        <SteamLeaderboards/>
+        <DiscordLeaderboards/>
       </div>,
       document.getElementById('content'));
   </script>

@@ -19,6 +19,7 @@ client.on('message', (message) => {
 });
 
 module.exports = {
+  client: client,
   start: () => {
     client.login(config.discordToken);
   }

@@ -1,11 +1,13 @@
-const _ = require('lodash');
-const request = require('request');
 const express = require('express');
 const app = express();
 
 const bots = require('.');
 bots.mooSteam.start();
 bots.mooDiscord.start();
+
+const _ = require('lodash');
+const request = require('request');
+const discordClient = require('./discord/bot').client;
 
 const config = require('./shared/config.json');
 const database = require('./shared/database');
@@ -39,12 +41,12 @@ app.get('/api/steamLeaderboards', (req, res) => {
       if (error)
         return res.send('ERROR');
 
-      var data = JSON.parse(body);
-      var playersById = _.keyBy(data.response.players, 'steamid');
+      let data = JSON.parse(body);
+      let playersById = _.keyBy(data.response.players, 'steamid');
 
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify({cows: _.map(cows, (cow) => {
-        var steamProfile = playersById[cow.userId];
+        let steamProfile = playersById[cow.userId];
         return {
           userId: cow.userId,
           username: steamProfile.personaname,
@@ -53,6 +55,21 @@ app.get('/api/steamLeaderboards', (req, res) => {
         };
       })}));
     });
+  });
+});
+
+app.get('/api/discordLeaderboards', (req, res) => {
+  database.getTopCows('Discord', 100, (err, cows) => {
+    if (err)
+      return res.send('ERROR');
+
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({cows: _.map(cows, (cow) => {
+      return {
+        userId: cow.userId,
+        moos: cow.total
+      };
+    })}));
   });
 });
 
