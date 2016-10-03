@@ -64,8 +64,8 @@
               {this.state.cows.map(function(cow, index) {
                 return (
                   <tr key={index}>
-                    <td>{index}.</td>
-                    <td><a href={cow.steamUrl}>{cow.username}</a></td>
+                    <td>{index+1}.</td>
+                    <td>{cow.username}</td>
                     <td>{cow.moos}</td>
                   </tr>
                 );
@@ -106,7 +106,7 @@
               {this.state.cows.map(function(cow, index) {
                 return (
                   <tr key={index}>
-                    <td>{index}.</td>
+                    <td>{index+1}.</td>
                     <td>{cow.userId}</td>
                     <td>{cow.moos}</td>
                   </tr>

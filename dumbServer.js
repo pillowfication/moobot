@@ -48,9 +48,9 @@ app.get('/api/steamLeaderboards', (req, res) => {
       res.send(JSON.stringify({cows: _.map(cows, (cow) => {
         let steamProfile = playersById[cow.userId];
         return {
-          userId: cow.userId,
+          // userId: cow.userId,
           username: steamProfile.personaname,
-          steamUrl: steamProfile.profileurl,
+          // steamUrl: steamProfile.profileurl,
           moos: cow.total
         };
       })}));
