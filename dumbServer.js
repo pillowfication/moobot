@@ -3,9 +3,9 @@ const request = require('request');
 const express = require('express');
 const app = express();
 
-// const bots = require('.');
-// bots.mooSteam.start();
-// bots.mooDiscord.start();
+const bots = require('.');
+bots.mooSteam.start();
+bots.mooDiscord.start();
 
 const config = require('./shared/config.json');
 const database = require('./shared/database');
