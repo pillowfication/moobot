@@ -20,10 +20,12 @@ const wheel = [
   'melon',
   'cherries',
   'peach',
+  'pineapple',
+  'tomato',
   'eggplant'
 ];
 
-const jackpotMultiplier = .3;
+const jackpotMultiplier = .8;
 let TEMP_JACKPOT_VAR = 0;
 
 function getJackpot() {
@@ -68,7 +70,7 @@ module.exports = function slots(message) {
     let slotString = `**${message.author.username}** spun the slots...\n` +
       `| :${slot1}: :${slot2}: :${slot3}: |\n`;
 
-    if (slot1 === slot2 === slot3) {
+    if (slot1 === slot2 && slots2 === slot3) {
       if (slot1 === 'cow') {
         let winnings = getJackpot();
         message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
@@ -76,7 +78,7 @@ module.exports = function slots(message) {
         return;
       }
       else {
-        let winnings = 50 * bet;
+        let winnings = 100 * bet;
         message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
         database.addCurrencyById('Discord', message.author.id, winnings, () => { /* what errors */ });
         return;
@@ -91,7 +93,7 @@ module.exports = function slots(message) {
     let hasPair = slot1 === slot2 || slot1 === slot3 || slot2 === slot3;
 
     if (cowCount === 1) {
-      let winnings = hasPair ? 5 * bet : 3 * bet;
+      let winnings = hasPair ? 8 * bet : 3 * bet;
       message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
       database.addCurrencyById('Discord', message.author.id, winnings, () => { /* what errors */ });
       return;
@@ -103,7 +105,7 @@ module.exports = function slots(message) {
     }
 
     if (hasPair) {
-      let winnings = 2 * bet;
+      let winnings = 4 * bet;
       message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
       database.addCurrencyById('Discord', message.author.id, winnings, () => { /* what errors */ });
       return;
