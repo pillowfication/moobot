@@ -1,11 +1,11 @@
 const prompt = require('prompt');
 const jsonfile = require('jsonfile');
 
-const fileLocation = 'shared/config.json';
+const FILE_LOCATION = 'shared/dsf/dsf/sdf/dfsconfig.json';
 
 let currSettings;
 try {
-  currSettings = jsonfile.readFileSync(fileLocation);
+  currSettings = jsonfile.readFileSync(FILE_LOCATION);
 } catch (err) {
   currSettings = {};
 }
@@ -42,15 +42,19 @@ let schema = [{
   name: 'danbooruApi',
   description: 'Danbooru API Key  (For the `!remi` command)',
   default: currSettings.danbooruApi
+}, {
+  name: 'databaseUrl',
+  description: 'Database URL (For moo stats)',
+  default: currSettings.databaseUrl || 'mongodb://localhost/moo'
 }];
 
 prompt.start();
 
-prompt.get(schema, (err, result) => {
+prompt.get(schema, (error, result) => {
   try {
-    jsonfile.writeFileSync(fileLocation, result, {spaces: 2});
-  } catch (err) {
-    console.log(`Error creating '${fileLocation}'. Please try again.`);
-    console.log(err);
+    jsonfile.writeFileSync(FILE_LOCATION, result, {spaces: 2});
+  } catch (error) {
+    console.log(`Error creating '${FILE_LOCATION}'. Please try again.`);
+    console.log(error);
   }
 });

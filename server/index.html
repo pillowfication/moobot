@@ -3,6 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <title>moo</title>
+  <style>
+    table  {border: 1px solid #555; border-collapse: collapse; text-align: center; font-size: 1.1em;}
+    tr     {border: 1px solid #BBB;}
+    th     {background-color: #CDF;}
+    th, td {padding: .4em .8em;}
+    tr:nth-child(odd) {background-color: #DDD}
+  </style>
   <script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
   <script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
   <script src="https://unpkg.com/babel-core@5.8.38/browser.min.js"></script>
@@ -20,7 +27,7 @@
         var _this = this;
         (function doQuery() {
           jQuery.ajax('/api/total').done(function(res) {
-            _this.setState({moos: res.total});
+            _this.setState({moos: res.totalMoos + res.totalMoosTriggered + res.totalBigMoosTriggered});
           });
           setTimeout(doQuery, 60000);
         })();
@@ -43,7 +50,9 @@
         (function doQuery() {
           jQuery.ajax('/api/steamLeaderboards')
             .done(function(res) {
-              _this.setState({cows: res.cows});
+              console.log('Got Steam response:', res);
+              window.steamRes = res;
+              _this.setState({cows: res});
             });
           setTimeout(doQuery, 60000);
         })();
@@ -59,14 +68,20 @@
               <tr>
                 <th>#</th>
                 <th>User</th>
+                <th>Points</th>
                 <th>Moos</th>
+                <th>Moos Triggered</th>
+                <th>MOOs Triggered</th>
               </tr>
               {this.state.cows.map(function(cow, index) {
                 return (
                   <tr key={index}>
                     <td>{index+1}.</td>
-                    <td>{cow.username}</td>
-                    <td>{cow.moos}</td>
+                    <td>{cow.userId}</td>
+                    <td>{cow.currency}</td>
+                    <td>{cow.totalMoos}</td>
+                    <td>{cow.totalMoosTriggered}</td>
+                    <td>{cow.totalBigMoosTriggered}</td>
                   </tr>
                 );
               })}
@@ -85,7 +100,9 @@
         (function doQuery() {
           jQuery.ajax('/api/discordLeaderboards')
             .done(function(res) {
-              _this.setState({cows: res.cows});
+              console.log('Got Discord response:', res);
+              window.discordRes = res;
+              _this.setState({cows: res});
             });
           setTimeout(doQuery, 60000);
         })();
@@ -101,14 +118,20 @@
               <tr>
                 <th>#</th>
                 <th>User</th>
+                <th>Points</th>
                 <th>Moos</th>
+                <th>Moos Triggered</th>
+                <th>MOOs Triggered</th>
               </tr>
               {this.state.cows.map(function(cow, index) {
                 return (
                   <tr key={index}>
                     <td>{index+1}.</td>
                     <td>{cow.userId}</td>
-                    <td>{cow.moos}</td>
+                    <td>{cow.currency}</td>
+                    <td>{cow.totalMoos}</td>
+                    <td>{cow.totalMoosTriggered}</td>
+                    <td>{cow.totalBigMoosTriggered}</td>
                   </tr>
                 );
               })}

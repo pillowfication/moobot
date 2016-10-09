@@ -1,23 +1,13 @@
-const database = require('../../shared/database');
+const baseMoo = require('../../shared/moo');
 
 // TODO: Unicode support for 🐮 and 🐄?
-const test = RegExp.prototype.test.bind(/\b(moo+(s|ed|ing)?|cow(s|like)?|kine|bovin(e|ely|ity))\b/i);
-const prob = .2;
-const MOOprob = .01;
+const test = RegExp.prototype.test.bind(/\b(moo+(s|ers?|ed|'d|ings?)?|cow(s|like)?)\b/i);
 
 module.exports = function moo(message) {
   if (message.author.bot || !test(message.content))
     return;
 
-  if (Math.random() < prob)
-    if (Math.random() < MOOprob) {
-      message.channel.sendMessage('MOO');
-      database.incrementById('Discord', message.author.id, 500, (err) => { /* what errors */ });
-    } else {
-      message.channel.sendMessage('moo');
-      database.incrementById('Discord', message.author.id, 2, (err) => { /* what errors */ });
-    }
-
-  else
-    database.incrementById('Discord', message.author.id, 1, (err) => { /* what errors */ });
+  let response = baseMoo('Discord', message.author.id);
+  if (response)
+    message.channel.sendMessage(response);
 };
