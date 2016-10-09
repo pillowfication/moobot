@@ -1,7 +1,7 @@
 const prompt = require('prompt');
 const jsonfile = require('jsonfile');
 
-const FILE_LOCATION = 'shared/dsf/dsf/sdf/dfsconfig.json';
+const FILE_LOCATION = 'shared/config.json';
 
 let currSettings;
 try {
