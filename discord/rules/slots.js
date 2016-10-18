@@ -70,7 +70,7 @@ module.exports = function slots(message) {
     let slotString = `**${message.author.username}** spun the slots...\n` +
       `| :${slot1}: :${slot2}: :${slot3}: |\n`;
 
-    if (slot1 === slot2 && slots2 === slot3) {
+    if (slot1 === slot2 && slot2 === slot3) {
       if (slot1 === 'cow') {
         let winnings = getJackpot();
         message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
