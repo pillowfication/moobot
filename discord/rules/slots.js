@@ -74,13 +74,12 @@ module.exports = function slots(message) {
       if (slot1 === 'cow') {
         let winnings = getJackpot();
         message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
-        database.addCurrencyById('Discord', message.author.id, winnings, () => { /* what errors */ });
+        database.addCurrencyById('Discord', message.author.id, winnings - bet, () => { /* what errors */ });
         return;
-      }
-      else {
-        let winnings = 100 * bet;
+      } else {
+        let winnings = 50 * bet;
         message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
-        database.addCurrencyById('Discord', message.author.id, winnings, () => { /* what errors */ });
+        database.addCurrencyById('Discord', message.author.id, winnings - bet, () => { /* what errors */ });
         return;
       }
     }
@@ -93,25 +92,25 @@ module.exports = function slots(message) {
     let hasPair = slot1 === slot2 || slot1 === slot3 || slot2 === slot3;
 
     if (cowCount === 1) {
-      let winnings = hasPair ? 8 * bet : 3 * bet;
+      let winnings = hasPair ? 4 * bet : 1 * bet;
       message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
-      database.addCurrencyById('Discord', message.author.id, winnings, () => { /* what errors */ });
+      database.addCurrencyById('Discord', message.author.id, winnings - bet, () => { /* what errors */ });
       return;
     } else if (cowCount === 2) {
-      let winnings = 10 * bet;
+      let winnings = 3 * bet;
       message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
-      database.addCurrencyById('Discord', message.author.id, winnings, () => { /* what errors */ });
+      database.addCurrencyById('Discord', message.author.id, winnings - bet, () => { /* what errors */ });
       return;
     }
 
     if (hasPair) {
-      let winnings = 4 * bet;
+      let winnings = 2 * bet;
       message.channel.sendMessage(slotString + `...and won ${winnings.toLocaleString()} points!`);
-      database.addCurrencyById('Discord', message.author.id, winnings, () => { /* what errors */ });
+      database.addCurrencyById('Discord', message.author.id, winnings - bet, () => { /* what errors */ });
       return;
     }
 
-    message.channel.sendMessage(slotString + `...and lost :(`);
+    message.channel.sendMessage(`${slotString}...and lost :(`);
     database.addCurrencyById('Discord', message.author.id, -bet, () => { /* what errors */ });
     TEMP_JACKPOT_VAR += bet;
   });

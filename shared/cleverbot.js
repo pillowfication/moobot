@@ -4,12 +4,12 @@ const config = require('./config.json');
 const bot = new cleverbot(config.cleverbotUsername, config.cleverbotApi);
 
 let ask = function(message, cb) {
-  setImmediate(cb, 'Cleverbot is still being initialized.', undefined);
+  setImmediate(cb, 'Cleverbot is still being initialized.');
 };
 
 bot.create((err) => {
   ask = err ? function(message, cb) {
-    setImmediate(cb, 'Cleverbot creation failed.', undefined);
+    setImmediate(cb, 'Cleverbot creation failed.');
   } : bot.ask.bind(bot);
 });
 
