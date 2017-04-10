@@ -8,12 +8,12 @@ const bot = new Discord.Client();
 require('./modules/osu').init(bot);
 
 bot.on('ready', () => {
-  winston.info('pillow-bot online');
+  winston.info('moobot online');
 });
 
 bot.login(config.discordToken)
   .then(() =>
-    winston.info('pillow-bot logged in.')
+    winston.info('moobot logged in.')
   )
   .catch(err => {
     winston.error('Could not log in', err);
