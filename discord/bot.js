@@ -1,32 +1,21 @@
 const Discord = require('discord.js');
-const client = new Discord.Client();
-const config = require('../shared/config.json');
+const winston = require('winston');
+const config = require('../config.json');
 
-const rules = [
-  require('./rules/moo'),
-  require('./rules/profile'),
-  // require('./rules/remi')
-  require('./rules/slots')
-  // require('./rules/talk')
-];
+const bot = new Discord.Client();
 
-client.on('ready', () => {
-  console.log('moo (Discord) is online!');
-  client.user.setStatus('online', 'pf-n.co/moo');
+// Plug in modules
+require('./modules/osu').init(bot);
+
+bot.on('ready', () => {
+  winston.info('pillow-bot online');
 });
 
-client.on('message', (message) => {
-  for (let rule of rules)
-    rule(message);
-});
-
-module.exports = {
-  client: client,
-  start: () => {
-    client.login(config.discordToken);
-  }
-};
-
-if (require.main === module) {
-  module.exports.start();
-}
+bot.login(config.discordToken)
+  .then(() =>
+    winston.info('pillow-bot logged in.')
+  )
+  .catch(err => {
+    winston.error('Could not log in', err);
+    process.exit(1);
+  });

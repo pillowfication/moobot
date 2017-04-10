@@ -1,53 +1,35 @@
 {
-  "name": "moo",
+  "name": "moo-bot",
   "version": "0.0.0",
-  "description": "moo",
+  "description": "moo-bot",
   "author": {
     "name": "Markus Tran",
     "email": "thebluepillow@gmail.com",
     "url": "http://pillowfication.com"
   },
-  "homepage": "https://github.com/pillowfication/moo",
+  "homepage": "https://github.com/pillowfication/moo-bot",
   "repository": {
     "type": "git",
-    "url": "git://github.com/pillowfication/moo.git"
+    "url": "git://github.com/pillowfication/moo-bot.git"
   },
   "bugs": {
-    "url": "https://github.com/pillowfication/moo/issues"
+    "url": "https://github.com/pillowfication/moo-bot/issues"
   },
   "main": "index.js",
   "scripts": {
-    "setup": "node setup",
-    "server": "node server/server",
-    "mooSteam": "node steam/bot",
-    "mooDiscord": "node discord/bot"
+    "setup": "node scripts/setup.js"
   },
   "dependencies": {
-    "async": "2.0.x",
-    "body-parser": "1.15.x",
-    "cleverbot.io": "1.0.x",
-    "connect-ensure-login": "0.1.x",
-    "cookie-parser": "1.4.x",
-    "discord.js": "9.3.x",
-    "express": "4.14.x",
-    "express-session": "1.14.x",
-    "jsonfile": "2.4.x",
-    "lodash": "4.16.x",
-    "mongoose": "4.6.x",
-    "morgan": "1.7.x",
-    "prompt": "1.0.x",
-    "request": "2.75.x",
-    "steam": "1.4.x"
+    "async": "^2.1.5",
+    "cheerio": "^0.22.0",
+    "discord.js": "^11.0.0",
+    "jsonfile": "^2.4.0",
+    "moment": "^2.18.0",
+    "prompt": "^1.0.0",
+    "request": "^2.81.0",
+    "winston": "^2.3.1"
   },
   "devDependencies": {
-    "eslint": "3.7.x",
-    "eslint-config-pf": "*"
-  },
-  "keywords": [
-    "pillow",
-    "moo",
-    "steambot",
-    "discordbot"
-  ],
-  "license": "MIT"
+    "eslint": "^3.18.0"
+  }
 }
