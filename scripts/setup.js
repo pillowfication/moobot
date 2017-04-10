@@ -13,12 +13,23 @@ try {
 
 const schema = [{
   name: 'discordToken',
-  description: 'Discord Bot Token',
+  description: '(moobot) Discord Bot Token',
   default: currSettings.discordToken
+}, {
+  name: 'email',
+  description: '(userbot) Email Address',
+  default: currSettings.email,
+  required: true
+}, {
+  name: 'password',
+  description: '(userbot) Password',
+  default: currSettings.password,
+  required: true
 }];
 
 prompt.start();
 
+/* eslint-disable no-console */
 prompt.get(schema, (err, result) => {
   try {
     jsonfile.writeFileSync(CONFIG_PATH, result, {spaces: 2});
@@ -28,3 +39,4 @@ prompt.get(schema, (err, result) => {
     console.log(err);
   }
 });
+/* eslint-enable no-console */
