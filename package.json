@@ -1,19 +1,19 @@
 {
-  "name": "moo-bot",
+  "name": "moobot",
   "version": "0.0.0",
-  "description": "moo-bot",
+  "description": "moobot",
   "author": {
     "name": "Markus Tran",
     "email": "thebluepillow@gmail.com",
     "url": "http://pillowfication.com"
   },
-  "homepage": "https://github.com/pillowfication/moo-bot",
+  "homepage": "https://github.com/pillowfication/moobot",
   "repository": {
     "type": "git",
-    "url": "git://github.com/pillowfication/moo-bot.git"
+    "url": "git://github.com/pillowfication/moobot.git"
   },
   "bugs": {
-    "url": "https://github.com/pillowfication/moo-bot/issues"
+    "url": "https://github.com/pillowfication/moobot/issues"
   },
   "main": "index.js",
   "scripts": {
