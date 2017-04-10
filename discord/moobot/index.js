@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const winston = require('winston');
-const config = require('../config.json');
+const config = require('../../config.json');
 
 const bot = new Discord.Client();
 
