@@ -4,7 +4,7 @@ const _winston = require('winston');
 
 module.exports = {
   init(me) {
-    const _regex = new RegExp(`^${me.prefix}eval\\s+\`\`\`([.\\n]*)\`\`\``);
+    const _regex = new RegExp(`^${me.prefix}eval\\s+\`\`\`(.*)\`\`\``);
 
     me.on('message', message => {
       if (message.author.id !== me.id || !message.content.startsWith(me.prefix))
