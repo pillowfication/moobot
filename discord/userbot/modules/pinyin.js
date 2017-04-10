@@ -53,34 +53,30 @@ function addTone(word) {
 
 module.exports = {
   init(me) {
-    const command = `${me.prefix}mand`;
+    const command = `${me.prefix}pinyin`;
     const regex = new RegExp(`^${command}\\s+(.*)`);
 
     me.on('message', message => {
-      if (message.author.id !== me.id)
-        return;
-      const content = message.content.match(regex);
-      if (!content || !content[1])
+      if (message.author.id !== me.id || !message.content.startsWith(me.prefix))
         return;
 
-      winston.info(message.content);
+      const match = message.content.match(regex);
+      const content = match && match[1];
+      if (!content)
+        return;
 
       message
         .edit(
-          content[1]
+          content
             .replace(/u:/g, 'ü')
             .replace(/U:/g, 'Ü')
             .split(/([a-zü]+[0-9]+)/gi)
             .map(addTone)
             .join('')
         )
-        .catch(err => {
-          winston.error('Could not edit message', err);
-          message.edit(
-            `${message.content}\n` +
-            `\`\`\`${err.message}\`\`\``
-          );
-        });
+        .catch(err =>
+          winston.error('Could not edit message', err)
+        );
     });
   }
 };

@@ -63,7 +63,7 @@ module.exports = {
         try {
           return extensions.has(path.extname((new url.URL(attachment.url)).pathname));
         } catch (err) {
-          winston.error('Image attachment had bad URL', err);
+          winston.error('Image attachment had bad URL.', err);
           return false;
         }
       }))
@@ -76,7 +76,7 @@ module.exports = {
             if (extensions.has(path.extname((new url.URL(link[0])).pathname)))
               image = link[0];
           } catch (err) {
-            winston.error('Link found had bad URL', err);
+            winston.error('Link found had bad URL.', err);
           }
       }
 
@@ -86,9 +86,9 @@ module.exports = {
 
       me.channels.get(board)
         .sendEmbed(embed)
-        .catch(err => {
-          winston.error('Couldn\'t send embed to #simjang', err);
-        });
+        .catch(err =>
+          winston.error('Couldn\'t send embed to #simjang.', err)
+        );
     });
   }
 };

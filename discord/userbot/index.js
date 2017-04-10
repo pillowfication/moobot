@@ -1,21 +1,18 @@
 const Discord = require('discord.js');
 const Constants = require('discord.js/src/util/Constants');
-const config = require('./config.json');
 const winston = require('winston');
+const config = require('../../config.json');
 
 const me = new Discord.Client();
 me.id = '144761456645242880';
 me.prefix = '~/';
 
-[
-  require('./modules/eval'),
-  require('./modules/exit'),
-  require('./modules/mathjax'),
-  require('./modules/ping'),
-  require('./modules/pinyin'),
-  require('./modules/simjang')
-]
-.forEach(mod => mod.init(me));
+// Plug in modules
+require('./modules/eval').init(me);
+require('./modules/mathjax').init(me);
+require('./modules/ping').init(me);
+require('./modules/pinyin').init(me);
+require('./modules/simjang').init(me);
 
 me.on('ready', () => {
   winston.info('Userbot ready.');
