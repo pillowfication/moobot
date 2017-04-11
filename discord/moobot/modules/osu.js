@@ -6,7 +6,6 @@ const request = require('request');
 const cheerio = require('cheerio');
 const moment = require('moment-timezone');
 const winston = require('winston');
-const config = require('../config');
 
 const DATA_PATH = path.join(__dirname, 'osu-data.json');
 const OSU_USER_URL = 'https://osu.ppy.sh/u/';
@@ -224,12 +223,12 @@ module.exports = {
       });
     });
 
-    const test = RegExp.prototype.test.bind(new RegExp(`^${bot.prefix}osu\\s+`));
+    const test = RegExp.prototype.test.bind(new RegExp(`^${bot.config.prefix}osu\\s+`));
 
     bot.on('message', message => {
       if (message.author.bot)
         return;
-      if (!config.admins.includes(message.author.id))
+      if (!bot.config.admins.includes(message.author.id))
         return;
 
       if (test(message.content)) {
@@ -239,7 +238,7 @@ module.exports = {
           case 'h': {
             message.channel
               .sendCode('',
-                `${bot.prefix}osu\n` +
+                `${bot.config.prefix}osu\n` +
                 '  help            Print this message\n' +
                 '  add <id>        Add a user to track\n' +
                 '  remove <id>     Remove a user from tracking\n' +
@@ -263,7 +262,7 @@ module.exports = {
             if (!id)
               return message.channel
                 .sendMessage(
-                  `No \`id\` specified. See \`${bot.prefix}osu help\` for more information.`
+                  `No \`id\` specified. See \`${bot.config.prefix}osu help\` for more information.`
                 )
                 .catch(err =>
                   winston.error('Cannot send message.', err)
@@ -287,7 +286,7 @@ module.exports = {
             if (!id)
               return message.channel
                 .sendMessage(
-                  `No \`id\` specified. See \`${bot.prefix}osu help\` for more information.`
+                  `No \`id\` specified. See \`${bot.config.prefix}osu help\` for more information.`
                 )
                 .catch(err =>
                   winston.error('Cannot send message.', err)

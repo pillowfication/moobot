@@ -1,9 +1,10 @@
 const Discord = require('discord.js');
 const winston = require('winston');
 const config = require('../../config.json');
+const botConfig = require('./config');
 
 const bot = new Discord.Client();
-bot.prefix = config.prefix;
+bot.config = botConfig;
 
 // Plug in modules
 require('./modules/osu').init(bot);
