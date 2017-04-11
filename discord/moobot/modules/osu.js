@@ -245,7 +245,7 @@ module.exports = {
                 '  list            List all tracked users\n' +
                 '  get [<id>]      Get a user\'s last tracked data\n' +
                 '  update          Update all users\n' +
-                '  bind            Bind the current channel to receive updates\n' +
+                '  bind [<id>]     Bind the current channel to receive updates\n' +
                 '  unbind          Unbind the current channel\n' +
                 '  channels        List all bound channels\n' +
                 '  start [<time>]  Start polling data with the specified interval\n' +
@@ -425,7 +425,7 @@ module.exports = {
           break;
 
           case 'bind': {
-            const id = message.channel.id;
+            const id = tokens[2] || message.channel.id;
             addChannel(id, err => {
               if (err)
                 return message.channel
