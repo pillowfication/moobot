@@ -239,7 +239,7 @@ module.exports = {
           case 'h': {
             message.channel
               .sendCode('',
-                'p!osu\n' +
+                `${bot.prefix}osu\n` +
                 '  help            Print this message\n' +
                 '  add <id>        Add a user to track\n' +
                 '  remove <id>     Remove a user from tracking\n' +
@@ -263,7 +263,7 @@ module.exports = {
             if (!id)
               return message.channel
                 .sendMessage(
-                  'No `id` specified. See `p!osu help` for more information.'
+                  `No \`id\` specified. See \`${bot.prefix}osu help\` for more information.`
                 )
                 .catch(err =>
                   winston.error('Cannot send message.', err)
@@ -287,7 +287,7 @@ module.exports = {
             if (!id)
               return message.channel
                 .sendMessage(
-                  'No `id` specified. See `p!osu help` for more information.'
+                  `No \`id\` specified. See \`${bot.prefix}osu help\` for more information.`
                 )
                 .catch(err =>
                   winston.error('Cannot send message.', err)
