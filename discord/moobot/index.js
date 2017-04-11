@@ -7,6 +7,7 @@ const bot = new Discord.Client();
 bot.config = botConfig;
 
 // Plug in modules
+require('./modules/moo').init(bot);
 require('./modules/osu').init(bot);
 
 bot.on('ready', () => {
