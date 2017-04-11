@@ -1,13 +1,13 @@
 const winston = require('winston');
 
-const REGEX = /(^|\s)moo+($\s)/i;
+const REGEX = /(^|\s)moo+($|\s)/i;
 const PROB = .2;
 
 const test = RegExp.prototype.test.bind(REGEX);
 
 module.exports = {
   init(bot) {
-    bot.on(message => {
+    bot.on('message', message => {
       if (message.author.bot)
         return;
 
