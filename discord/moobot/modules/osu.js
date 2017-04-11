@@ -5,6 +5,7 @@ const jsonfile = require('jsonfile');
 const request = require('request');
 const cheerio = require('cheerio');
 const moment = require('moment-timezone');
+const winston = require('winston');
 const config = require('../config');
 
 const DATA_PATH = path.join(__dirname, 'osu-data.json');
@@ -27,11 +28,6 @@ const TIMEZONE = 'America/Los_Angeles';
 
 function format(date, format = 'MM/DD HH:mm') {
   return moment.tz(date, TIMEZONE).format(format);
-}
-
-// TODO: Winston
-function logErr(err) {
-  return console.log(err);
 }
 
 const osuEmitter = new EventEmitter();
@@ -216,10 +212,13 @@ module.exports = {
           const channel = bot.channels.get(id);
           if (channel)
             changes.forEach(change => {
-              channel.sendMessage(
-                `User \`${change.username}\` has come online (${format(change.date)}).`
-              )
-              .catch(logErr);
+              channel
+                .sendMessage(
+                  `User \`${change.username}\` has come online (${format(change.date)}).`
+                )
+                .catch(err =>
+                  winston.error('Cannot send message.', err)
+                );
             });
         }
       });
@@ -236,35 +235,47 @@ module.exports = {
         switch (tokens[1]) {
           case 'help':
           case 'h': {
-            message.channel.sendCode('',
-              'p!osu\n' +
-              '  help            Print this message\n' +
-              '  add <id>        Add a user to track\n' +
-              '  remove <id>     Remove a user from tracking\n' +
-              '  list            List all tracked users\n' +
-              '  get [<id>]      Get a user\'s last tracked data\n' +
-              '  update          Update all users\n' +
-              '  bind            Bind the current channel to receive updates\n' +
-              '  unbind          Unbind the current channel\n' +
-              '  channels        List all bound channels\n' +
-              '  start [<time>]  Start polling data with the specified interval\n' +
-              '  stop            Stop polling data'
-            );
+            message.channel
+              .sendCode('',
+                'p!osu\n' +
+                '  help            Print this message\n' +
+                '  add <id>        Add a user to track\n' +
+                '  remove <id>     Remove a user from tracking\n' +
+                '  list            List all tracked users\n' +
+                '  get [<id>]      Get a user\'s last tracked data\n' +
+                '  update          Update all users\n' +
+                '  bind            Bind the current channel to receive updates\n' +
+                '  unbind          Unbind the current channel\n' +
+                '  channels        List all bound channels\n' +
+                '  start [<time>]  Start polling data with the specified interval\n' +
+                '  stop            Stop polling data'
+              )
+              .catch(err =>
+                winston.error('Cannot send message.', err)
+              );
           }
           break;
 
           case 'add': {
             const id = tokens[2];
             if (!id)
-              message.channel.sendMessage(
-                'No `id` specified. See `p!osu help` for more information.'
-              ).catch(logErr);
+              return message.channel
+                .sendMessage(
+                  'No `id` specified. See `p!osu help` for more information.'
+                )
+                .catch(err =>
+                  winston.error('Cannot send message.', err)
+                );
 
             addEntry(id, (err, entry) => {
-              message.channel.sendMessage(err
-                ? `Error adding \`${entry.id}\`!`
-                : `Added \`${entry.id}\` (${format(entry.date)}).`
-              ).catch(logErr);
+              message.channel
+                .sendMessage(err
+                  ? `Error adding \`${entry.id}\`!`
+                  : `Added \`${entry.id}\` (${format(entry.date)}).`
+                )
+                .catch(err =>
+                  winston.error('Cannot send message.', err)
+                );
             });
           }
           break;
@@ -272,15 +283,23 @@ module.exports = {
           case 'remove': {
             const id = tokens[2];
             if (!id)
-              return message.channel.sendMessage(
-                'No `id` specified. See `p!osu help` for more information.'
-              ).catch(logErr);
+              return message.channel
+                .sendMessage(
+                  'No `id` specified. See `p!osu help` for more information.'
+                )
+                .catch(err =>
+                  winston.error('Cannot send message.', err)
+                );
 
             deleteEntry(id, (err, id) => {
-              message.channel.sendMessage(err
-                ? `Error removing \`${id}\`!`
-                : `Removed \`${id}\`.`
-              ).catch(logErr);
+              message.channel
+                .sendMessage(err
+                  ? `Error removing \`${id}\`!`
+                  : `Removed \`${id}\`.`
+                )
+                .catch(err =>
+                  winston.error('Cannot send message.', err)
+                );
             });
           }
           break;
@@ -288,15 +307,23 @@ module.exports = {
           case 'list': {
             jsonfile.readFile(DATA_PATH, (err, data) => {
               if (err)
-                return message.channel.sendMessage(
-                  'Error listing users!'
-                ).catch(logErr);
+                return message.channel
+                  .sendMessage(
+                    'Error listing users!'
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
 
               const users = Object.keys(data.users);
-              message.channel.sendMessage(users.length
-                ? `Users: ${users.map(user => `\`${user}\``).join(', ')}`
-                : 'Users: (none)'
-              ).catch(logErr);
+              message.channel
+                .sendMessage(users.length
+                  ? `Users: ${users.map(user => `\`${user}\``).join(', ')}`
+                  : 'Users: (none)'
+                )
+                .catch(err =>
+                  winston.error('Cannot send message.', err)
+                );
             });
           }
           break;
@@ -307,28 +334,44 @@ module.exports = {
             if (id)
               jsonfile.readFile(DATA_PATH, (err, data) => {
                 if (err)
-                  return message.channel.sendMessage(
-                    `Error getting user \`${id}\`!`
-                  ).catch(logErr);
+                  return message.channel
+                    .sendMessage(
+                      `Error getting user \`${id}\`!`
+                    )
+                    .catch(err =>
+                      winston.error('Cannot send message.', err)
+                    );
 
-                message.channel.sendMessage(data.users[id] !== undefined
-                  ? `User \`${id}\` (${format(data.users[id])} - ${moment(data.users[id]).fromNow()})`
-                  : `User \`${id}\` is not being tracked.`
-                ).catch(logErr);
+                message.channel
+                  .sendMessage(data.users[id] !== undefined
+                    ? `User \`${id}\` (${format(data.users[id])} - ${moment(data.users[id]).fromNow()})`
+                    : `User \`${id}\` is not being tracked.`
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
               });
 
             else
               jsonfile.readFile(DATA_PATH, (err, data) => {
                 if (err)
-                  return message.channel.sendMessage(
-                    'Error getting users!'
-                  ).catch(logErr);
+                  return message.channel
+                    .sendMessage(
+                      'Error getting users!'
+                    )
+                    .catch(err =>
+                      winston.error('Cannot send message.', err)
+                    );
 
                 const users = Object.keys(data.users);
-                message.channel.sendMessage(users.length
-                  ? `Users: ${users.map(id => `\`${id}\` (${format(data.users[id])})`).join(', ')}`
-                  : 'Users: (none)'
-                ).catch(logErr);
+                message.channel
+                  .sendMessage(users.length
+                    ? `Users: ${users.map(id => `\`${id}\` (${format(data.users[id])})`).join(', ')}`
+                    : 'Users: (none)'
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
               });
           }
           break;
@@ -339,27 +382,43 @@ module.exports = {
             if (id)
               getLastActive(id, (err, active) => {
                 if (err)
-                  return message.channel.sendMessage(
-                    `Error updating user \`${id}\`!`
-                  ).catch(logErr);
+                  return message.channel
+                    .sendMessage(
+                      `Error updating user \`${id}\`!`
+                    )
+                    .catch(err =>
+                      winston.error('Cannot send message.', err)
+                    );
 
-                message.channel.sendMessage(
-                  `User \`${active.username}\` updated (${format(active.date)} - ${moment(active.date).fromNow()}).`
-                ).catch(logErr);
+                message.channel
+                  .sendMessage(
+                    `User \`${active.username}\` updated (${format(active.date)} - ${moment(active.date).fromNow()}).`
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
               });
 
             else
               updateLastActive((err, changes) => {
                 if (err)
-                  return message.channel.sendMessage(
-                    'Error updating users!'
-                  ).catch(logErr);
+                  return message.channel
+                    .sendMessage(
+                      'Error updating users!'
+                    )
+                    .catch(err =>
+                      winston.error('Cannot send message.', err)
+                    );
 
-                message.channel.sendMessage(changes.length
-                  ? 'Updated users:' +
-                      changes.map(change => `\`${change.username}\` (${format(change.date)})`).join(', ')
-                  : 'Updated users: (no changes).'
-                ).catch(logErr);
+                message.channel
+                  .sendMessage(changes.length
+                    ? 'Updated users:' +
+                        changes.map(change => `\`${change.username}\` (${format(change.date)})`).join(', ')
+                    : 'Updated users: (no changes).'
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
               });
           }
           break;
@@ -368,13 +427,21 @@ module.exports = {
             const id = message.channel.id;
             addChannel(id, err => {
               if (err)
-                return message.channel.sendMessage(
-                  'Error binding channel!'
-                ).catch(logErr);
+                return message.channel
+                  .sendMessage(
+                    'Error binding channel!'
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
 
-              message.channel.sendMessage(
-                `Channel \`${id}\` bound.`
-              ).catch(logErr);
+              message.channel
+                .sendMessage(
+                  `Channel \`${id}\` bound.`
+                )
+                .catch(err =>
+                  winston.error('Cannot send message.', err)
+                );
             });
           }
           break;
@@ -383,13 +450,21 @@ module.exports = {
             const id = message.channel.id;
             deleteChannel(id, err => {
               if (err)
-                return message.channel.sendMessage(
-                  'Error unbinding channel!'
-                ).catch(logErr);
+                return message.channel
+                  .sendMessage(
+                    'Error unbinding channel!'
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
 
-              message.channel.sendMessage(
-                `Channel \`${id}\` unbound.`
-              ).catch(logErr);
+              message.channel
+                .sendMessage(
+                  `Channel \`${id}\` unbound.`
+                )
+                .catch(err =>
+                  winston.error('Cannot send message.', err)
+                );
             });
           }
           break;
@@ -397,15 +472,23 @@ module.exports = {
           case 'channels': {
             jsonfile.readFile(DATA_PATH, (err, data) => {
               if (err)
-                return message.channel.sendMessage(
-                  'Error listing channels!'
-                ).catch(logErr);
+                return message.channel
+                  .sendMessage(
+                    'Error listing channels!'
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
 
                 const channels = Object.keys(data.channels);
-                message.channel.sendMessage(channels.length
-                  ? `Channels: ${channels.map(id => `\`${id}\``).join(', ')}`
-                  : 'Channels: (none)'
-                ).catch(logErr);
+                message.channel
+                  .sendMessage(channels.length
+                    ? `Channels: ${channels.map(id => `\`${id}\``).join(', ')}`
+                    : 'Channels: (none)'
+                  )
+                  .catch(err =>
+                    winston.error('Cannot send message.', err)
+                  );
             });
           }
           break;
@@ -413,17 +496,23 @@ module.exports = {
           case 'start': {
             const delay = +tokens[2] || 3 * 60 * 1000;
             startInterval(delay);
-            message.channel.sendMessage(
-              `Interval started with delay \`${delay}\``
-            ).catch(logErr);
+            message.channel
+              .sendMessage(
+                `Interval started with delay \`${delay}\``
+              ).catch(err =>
+                winston.error('Cannot send message.', err)
+              );
           }
           break;
 
           case 'stop': {
             stopInterval();
-            message.channel.sendMessage(
-              'Interval stopped'
-            ).catch(logErr);
+            message.channel
+              .sendMessage(
+                'Interval stopped'
+              ).catch(err =>
+                winston.error('Cannot send message.', err)
+              );
           }
           break;
         }
