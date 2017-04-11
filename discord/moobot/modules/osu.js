@@ -224,13 +224,15 @@ module.exports = {
       });
     });
 
+    const test = RegExp.prototype.test.bind(new RegExp(`^${bot.prefix}osu\\s+`));
+
     bot.on('message', message => {
       if (message.author.bot)
         return;
       if (!config.admins.includes(message.author.id))
         return;
 
-      if (/^p!osu/.test(message.content)) {
+      if (test(message.content)) {
         const tokens = message.content.split(/\s+/);
         switch (tokens[1]) {
           case 'help':

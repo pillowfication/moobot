@@ -3,6 +3,7 @@ const winston = require('winston');
 const config = require('../../config.json');
 
 const bot = new Discord.Client();
+bot.prefix = config.prefix;
 
 // Plug in modules
 require('./modules/osu').init(bot);
