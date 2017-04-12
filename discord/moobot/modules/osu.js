@@ -226,12 +226,10 @@ module.exports = {
     const test = RegExp.prototype.test.bind(new RegExp(`^${bot.config.prefix}osu\\s+`));
 
     bot.on('message', message => {
-      if (message.author.bot)
-        return;
-      if (!bot.config.admins.includes(message.author.id))
+      if (message.author.bot || !bot.config.admins.includes(message.author.id))
         return;
 
-      if (test(message.content)) {
+      if (message.content.startsWith(bot.config.prefix) && test(message.content)) {
         const tokens = message.content.split(/\s+/);
         switch (tokens[1]) {
           case 'help':

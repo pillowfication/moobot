@@ -11,7 +11,7 @@ module.exports = {
       if (message.author.bot)
         return;
 
-      if (test(message.content) && Math.random() < PROB)
+      if (Math.random() < PROB && test(message.content))
         message.channel
           .sendMessage('moo')
           .catch(err =>

@@ -14,10 +14,6 @@ require('./modules/ping').init(me);
 require('./modules/pinyin').init(me);
 require('./modules/simjang').init(me);
 
-me.on('ready', () => {
-  winston.info('Userbot ready.');
-});
-
 me.loginEmailPassword = function(email, password) {
   return new Promise((resolve, reject) => {
     this.rest.client.email = email;
@@ -30,11 +26,20 @@ me.loginEmailPassword = function(email, password) {
   });
 };
 
-me.loginEmailPassword(config.email, config.password)
-  .then(() =>
-    winston.info('Userbot logged in.')
-  )
-  .catch(err => {
-    winston.error('Could not log in', err);
-    process.exit(1);
+me.start = me.loginEmailPassword.bind(me, config.email, config.password);
+
+if (require.main === module) {
+  me.on('ready', () => {
+    winston.info('Userbot ready.');
   });
+
+  me.start()
+    .then(() =>
+      winston.info('Userbot logged in.')
+    )
+    .catch(() =>
+      winston.info('Userbot could not log in.')
+    );
+}
+
+module.exports = me;

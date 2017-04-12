@@ -9,6 +9,7 @@ bot.config = botConfig;
 // Plug in modules
 require('./modules/moo').init(bot);
 require('./modules/osu').init(bot);
+require('./modules/userbot').init(bot);
 
 bot.on('ready', () => {
   winston.info('moobot online');
