@@ -1,3 +1,4 @@
+const path = require('path');
 const Discord = require('discord.js');
 const winston = require('winston');
 const config = require('../../config.json');
@@ -7,8 +8,10 @@ const bot = new Discord.Client();
 bot.config = botConfig;
 
 // Plug in modules
-require('./modules/moo').init(bot);
-require('./modules/osu').init(bot);
+require('./modules/moo').init(bot, {});
+require('./modules/osu').init(bot, {
+  dataPath: path.join(__dirname, 'data', 'osu-data.json')
+});
 require('./modules/userbot').init(bot);
 
 bot.on('ready', () => {

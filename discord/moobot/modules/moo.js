@@ -1,17 +1,20 @@
 const winston = require('winston');
 
-const REGEX = /(^|\s)moo+($|\s)/i;
-const PROB = .2;
-
-const test = RegExp.prototype.test.bind(REGEX);
-
 module.exports = {
-  init(bot) {
+  defaults: {
+    probability: .2,
+    regex: /\bmoo+\b/i
+  },
+
+  init(bot, options) {
+    options = Object.assign({}, module.exports.defaults, options);
+    const test = RegExp.prototype.test.bind(options.regex);
+
     bot.on('message', message => {
       if (message.author.bot)
         return;
 
-      if (Math.random() < PROB && test(message.content))
+      if (Math.random() < options.probability && test(message.content))
         message.channel
           .sendMessage('moo')
           .catch(err =>

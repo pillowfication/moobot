@@ -1,521 +1,418 @@
 const EventEmitter = require('events');
 const path = require('path');
-const async = require('async');
-const jsonfile = require('jsonfile');
 const request = require('request');
 const cheerio = require('cheerio');
 const moment = require('moment-timezone');
 const winston = require('winston');
+const persist = require('../../../utils/persist');
 
-const DATA_PATH = path.join(__dirname, 'osu-data.json');
 const OSU_USER_URL = 'https://osu.ppy.sh/u/';
-const TIMEZONE = 'America/Los_Angeles';
 
-/**
- * osu-data.json
- * {
- *   "users": {
- *     <osu_id>: <last_online_timestamp>,
- *     ...
- *   },
- *   "channels": {
- *     <channel_id>: true,
- *     ...
- *   }
- * }
- */
-
-function format(date, format = 'MM/DD HH:mm') {
-  return moment.tz(date, TIMEZONE).format(format);
+function sendMessageError(err) {
+  winston.error('Could not send message.', err);
 }
 
-const osuEmitter = new EventEmitter();
-let osuTimer = null;
-let stopTimer = false;
-
-function startInterval(delay) {
-  stopTimer = false;
-  if (!osuTimer)
-    (function _interval() {
-      osuTimer = setTimeout(() => {
-        updateLastActive((err, changes) => {
-          if (!stopTimer) {
-            osuEmitter.emit('update', err, changes);
-            _interval();
-          }
-        });
-      }, delay);
-    })();
-}
-
-function stopInterval() {
-  stopTimer = true;
-  if (osuTimer) {
-    clearTimeout(osuTimer);
-    osuTimer = null;
-  }
-}
-
-function getLastActive(id, cb) {
-  request.get(`${OSU_USER_URL}${id}`, (err, res, body) => {
-    if (err || !body)
-      return cb(err || new Error('No response found.'));
-
-    const $ = cheerio.load(body, {normalizeWhitespace: true});
-
-    // <div class="profile-username">
-    //   Pillowfication
-    // </div>
-    const username = $('.profile-username').text().trim();
-
-    // <div title='Last Active'>
-    //   <i class='icon-signout'></i>
-    //   <div>
-    //     <time class='timeago' datetime='2017-03-18T16:04:32Z'>2017-03-18 16:04:32 UTC</time>
-    //   </div>                            ^^^^^^^^^^^^^^^^^^^^
-    // </div>
-    const date = $('div[title="Last Active"] time').attr('datetime');
-
-    if (!username || !date)
-      return cb(new Error('Error parsing response.'));
-
-    cb(null, {
-      username,
-      date: moment(date).valueOf()
-    });
-  });
-}
-
-function updateLastActive(cb) {
-  jsonfile.readFile(DATA_PATH, (err, prev) => {
-    if (err)
-      return cb(err);
-
-    async.mapValuesLimit(prev.users, 20,
-      (_, id, cb) => {
-        getLastActive(id, (err, active) => {
-          if (err)
-            return cb(null, {err});
-
-          cb(null, {
-            username: active.username,
-            date: active.date
-          });
-        });
-      },
-      (err, curr) => {
-        const changes = [];
-        for (const id in prev.users) {
-          if (!curr[id].err && prev.users[id] && curr[id].date && curr[id].date > prev.users[id])
-            changes.push({
-              username: curr[id].username,
-              date: curr[id].date
-            });
-          prev.users[id] = curr[id].date || prev.users[id];
-        }
-
-        // curr[id].err objects ignored
-
-        jsonfile.writeFile(DATA_PATH, prev, {spaces: 2}, err => {
-          cb(err, changes);
-        });
+function getLastActive(id) {
+  return new Promise((resolve, reject) => {
+    request.get(`${OSU_USER_URL}${id}`, (err, res, body) => {
+      if (err || !body) {
+        return reject(err || new Error('No response found'));
       }
-    );
-  });
-}
 
-function addEntry(id, cb) {
-  getLastActive(id, (err, active) => {
-    if (err)
-      return cb(err);
+      const now = Date.now();
+      const $ = cheerio.load(body);
 
-    jsonfile.readFile(DATA_PATH, (err, data) => {
-      if (err)
-        return cb(err);
+      // <h2>
+      //   The user you are looking for was not found!
+      // </h2>
+      const notFound = /the user you are looking for was not found/i.test($('h2').text());
+      if (notFound) {
+        return reject(new Error(`User \`${id}\` does not exist`));
+      }
 
-      const date = active.date || 0;
-      data.users[id] = date;
 
-      jsonfile.writeFile(DATA_PATH, data, {spaces: 2}, err => {
-        cb(err, {id, date});
+      // <div class="profile-username">
+      //   Pillowfication
+      // </div>
+      const username = $('.profile-username').text().trim();
+
+      // <div title='Last Active'>
+      //   <i class='icon-signout'></i>
+      //   <div>
+      //     <time class='timeago' datetime='2017-03-18T16:04:32Z'>2017-03-18 16:04:32 UTC</time>
+      //   </div>                            ^^^^^^^^^^^^^^^^^^^^
+      // </div>
+      const date = $('div[title="Last Active"] time').attr('datetime');
+
+      if (!username || !date) {
+        return reject(new Error('Error parsing response'));
+      }
+
+      resolve({
+        username,
+        date: moment(date).valueOf(),
+        timestamp: now
       });
-    });
-  });
-}
-
-function deleteEntry(id, cb) {
-  jsonfile.readFile(DATA_PATH, (err, data) => {
-    if (err)
-      return cb(err);
-
-    delete data.users[id];
-
-    jsonfile.writeFile(DATA_PATH, data, {spaces: 2}, err => {
-      cb(err, id);
-    });
-  });
-}
-
-function addChannel(id, cb) {
-  jsonfile.readFile(DATA_PATH, (err, data) => {
-    if (err)
-      return cb(err);
-
-    data.channels[id] = true;
-
-    jsonfile.writeFile(DATA_PATH, data, {spaces: 2}, err => {
-      cb(err, id);
-    });
-  });
-}
-
-function deleteChannel(id, cb) {
-  jsonfile.readFile(DATA_PATH, (err, data) => {
-    if (err)
-      return cb(err);
-
-    delete data.channels[id];
-
-    jsonfile.writeFile(DATA_PATH, data, {spaces: 2}, err => {
-      cb(err, id);
     });
   });
 }
 
 module.exports = {
-  init(bot) {
-    try {
-      jsonfile.readFileSync(DATA_PATH);
-    } catch (e) {
-      jsonfile.writeFileSync(DATA_PATH, {
-        users: {},
-        channels: {}
-      }, {spaces: 2});
+  defaults: {
+    command: 'osu',
+    dataPath: path.join(__dirname, 'osu-data.json'),
+    timezone: 'America/Los_Angeles',
+    delay: 60 * 1000
+  },
+
+  init(bot, options) {
+    options = Object.assign({}, module.exports.defaults, options);
+    const command = `${bot.config.prefix}${options.command}`;
+    const data = persist(options.dataPath);
+
+    function format(date, fromNow) {
+      return fromNow
+        ? moment.tz(date, options.timezone).format('MM/DD HH:mm') + ' - ' + moment(date).fromNow()
+        : moment.tz(date, options.timezone).format('MM/DD HH:mm');
     }
 
-    // Update data immediately without triggering a 'change' event
-    updateLastActive(() => {});
+    function addUser(id) {
+      return data.get(['users', id])
+        .then(info => info === undefined
+          ? id
+          : Promise.reject(new Error(`User \`${id}\` already exists`))
+        )
+        .then(id => getLastActive(id))
+        .then(info => data.set(['users', id], info));
+    }
 
-    // Start the interval
-    startInterval(3 * 60 * 1000);
+    function deleteUser(id) {
+      return data.get(['users', id])
+        .then(info => info === undefined
+          ? Promise.reject(new Error(`User \`${id}\` does not exist`))
+          : id
+        )
+        .then(id => data.set(['users', id], undefined))
+        .then(() => id);
+    }
 
-    osuEmitter.on('update', (err, changes) => {
-      if (err || !changes || !changes.length)
-        return;
+    function listUsers() {
+      return data.get('users', {})
+        .then(users => Object.keys(users));
+    }
 
-      jsonfile.readFile(DATA_PATH, (err, obj) => {
-        if (err)
-          { /* Do Nothing */ }
+    function getUser(id) {
+      return data.get(['users', id])
+        .then(info => info === undefined
+          ? Promise.reject(new Error(`User \`${id}\` is not being tracked`))
+          : info
+        );
+    }
 
-        for (const id in obj.channels) {
-          const channel = bot.channels.get(id);
-          if (channel)
-            changes.forEach(change => {
-              channel
-                .sendMessage(
-                  `User \`${change.username}\` has come online (${format(change.date)}).`
-                )
-                .catch(err =>
-                  winston.error('Cannot send message.', err)
-                );
+    function addChannel(id) {
+      return bot.channels.get(id)
+        ? data.get(['channels', id])
+          .then(bound => bound === undefined
+            ? id
+            : Promise.reject(new Error(`Channel \`${id}\` already bound`))
+          )
+          .then(id => data.set(['channels', id], true))
+          .then(() => id)
+        : Promise.reject(new Error(`Channel \`${id}\` was not found`));
+    }
+
+    function deleteChannel(id) {
+      return data.get(['channels', id])
+        .then(bound => bound === undefined
+          ? Promise.reject(new Error(`Channel \`${id}\` is not bound`))
+          : id
+        )
+        .then(id => data.set(['channels', id], undefined))
+        .then(() => id);
+    }
+
+    function listChannels() {
+      return data.get('channels', {})
+        .then(channels => Object.keys(channels));
+    }
+
+    function updateAllUsers() {
+      return data.get('users', {})
+        .then(users =>
+          Promise.all(Object.keys(users).map(id =>
+            getLastActive(id)
+              .catch(err => ({id, err}))
+              .then(info => ({id, info}))
+          ))
+          .then(results => {
+            const newUsers = {};
+            results.forEach(({id, info, err}) => {
+              newUsers[id] = err ? {err} : info;
             });
-        }
-      });
-    });
+            return {oldUsers: users, newUsers};
+          })
+        )
+        .then(({oldUsers, newUsers}) => {
+          const changes = [];
+          const errors = [];
+          for (const id in oldUsers) {
+            const [oldUser, newUser] = [oldUsers[id], newUsers[id]];
+            if (newUser.err) {
+              errors.push(newUser.err);
+            }
+            else {
+              if (newUser.date > oldUser.date) {
+                changes.push({id, date: newUser.date});
+              }
+              oldUsers[id] = newUser;
+            }
+          }
+          return data.set('users', oldUsers)
+            .then(() => ({changes, errors}));
+        });
+    }
 
-    const test = RegExp.prototype.test.bind(new RegExp(`^${bot.config.prefix}osu\\s+`));
+    const osuEmitter = new EventEmitter();
+    osuEmitter.timer = null;
+    osuEmitter.status = 'STOP';
+
+    osuEmitter.startInterval = function startInterval(delay) {
+      if (osuEmitter.status !== 'STOP') {
+        return;
+      }
+
+      osuEmitter.status = 'START';
+      (function _startInterval() {
+        osuEmitter.timer = setTimeout(() => {
+          osuEmitter.status = 'LOAD';
+          updateAllUsers()
+            .then(({changes, errors}) => {
+              if (osuEmitter.status === 'LOAD') {
+                osuEmitter.status = 'START';
+                osuEmitter.emit('change', changes, errors);
+                _startInterval();
+              }
+            });
+        }, delay);
+      })();
+    };
+
+    osuEmitter.stopInterval = function stopInterval() {
+      if (osuEmitter.status === 'STOP') {
+        return;
+      }
+
+      clearTimeout(osuEmitter.timer);
+      osuEmitter.timer = null;
+      osuEmitter.status = 'STOP';
+    };
+
+    const test = RegExp.prototype.test.bind(new RegExp(`^${command}\\s`));
 
     bot.on('message', message => {
-      if (message.author.bot || !bot.config.admins.includes(message.author.id))
+      if (message.author.bot
+        || !bot.config.admins.includes(message.author.id)
+        || !message.content.startsWith(bot.config.prefix)
+        || !test(message.content)
+      ) {
         return;
+      }
 
-      if (message.content.startsWith(bot.config.prefix) && test(message.content)) {
-        const tokens = message.content.split(/\s+/);
-        switch (tokens[1]) {
-          case 'help':
-          case 'h': {
-            message.channel
-              .sendCode('',
-                `${bot.config.prefix}osu\n` +
-                '  help            Print this message\n' +
-                '  add <id>        Add a user to track\n' +
-                '  remove <id>     Remove a user from tracking\n' +
-                '  list            List all tracked users\n' +
-                '  get [<id>]      Get a user\'s last tracked data\n' +
-                '  update          Update all users\n' +
-                '  bind [<id>]     Bind the current channel to receive updates\n' +
-                '  unbind          Unbind the current channel\n' +
-                '  channels        List all bound channels\n' +
-                '  start [<time>]  Start polling data with the specified interval\n' +
-                '  stop            Stop polling data'
-              )
-              .catch(err =>
-                winston.error('Cannot send message.', err)
-              );
-          }
+      const tokens = message.content.split(/\s+/);
+      switch (tokens[1]) {
+        case 'help': {
+          message.channel
+            .sendCode('',
+              `${command}\n` +
+              '  help            Print this message\n' +
+              '  add <id>        Add a user for tracking\n' +
+              '  delete <id>     Remove a user from tracking\n' +
+              '  list            List all tracked users\n' +
+              '  get <id>        Get a user\'s last tracked data\n' +
+              '  bind [<id>]     Bind the current channel to receive updates\n' +
+              '  unbind [<id>]   Unbind the current channel\n' +
+              '  channels        List all bound channels\n' +
+              '  start [<time>]  Start polling data with the specified interval\n' +
+              '  stop            Stop polling data\n' +
+              '  update          Immediately invoke polling'
+            )
+            .catch(sendMessageError);
           break;
+        }
 
-          case 'add': {
-            const id = tokens[2];
-            if (!id)
-              return message.channel
-                .sendMessage(
-                  `No \`id\` specified. See \`${bot.config.prefix}osu help\` for more information.`
-                )
-                .catch(err =>
-                  winston.error('Cannot send message.', err)
-                );
+        case 'add': {
+          const id = tokens[2];
 
-            addEntry(id, (err, entry) => {
-              message.channel
-                .sendMessage(err
-                  ? `Error adding \`${entry.id}\`!`
-                  : `Added \`${entry.id}\` (${format(entry.date)}).`
-                )
-                .catch(err =>
-                  winston.error('Cannot send message.', err)
-                );
-            });
+          if (!id) {
+            return message.channel
+              .sendMessage(`No \`id\` specified. See \`${command} help\` for more information.`)
+              .catch(sendMessageError);
           }
+
+          addUser(id)
+            .then(info => `Added \`${info.username}\` (${format(info.date, true)}).`)
+            .catch(err => `Error adding user \`${id}\`. ${err.message}.`)
+            .then(msg => message.channel.sendMessage(msg))
+            .catch(sendMessageError);
+
           break;
+        }
 
-          case 'remove': {
-            const id = tokens[2];
-            if (!id)
-              return message.channel
-                .sendMessage(
-                  `No \`id\` specified. See \`${bot.config.prefix}osu help\` for more information.`
-                )
-                .catch(err =>
-                  winston.error('Cannot send message.', err)
-                );
+        case 'delete': {
+          const id = tokens[2];
 
-            deleteEntry(id, (err, id) => {
-              message.channel
-                .sendMessage(err
-                  ? `Error removing \`${id}\`!`
-                  : `Removed \`${id}\`.`
-                )
-                .catch(err =>
-                  winston.error('Cannot send message.', err)
-                );
-            });
+          if (!id) {
+            return message.channel
+              .sendMessage(`No \`id\` specified. See \`${command} help\` for more information.`)
+              .catch(sendMessageError);
           }
+
+          deleteUser(id)
+            .then(id => `Deleted \`${id}\`.`)
+            .catch(err => `Error deleting user \`${id}\`. ${err.message}.`)
+            .then(msg => message.channel.sendMessage(msg))
+            .catch(sendMessageError);
+
           break;
+        }
 
-          case 'list': {
-            jsonfile.readFile(DATA_PATH, (err, data) => {
-              if (err)
-                return message.channel
-                  .sendMessage(
-                    'Error listing users!'
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
+        case 'list': {
+          listUsers()
+            .then(users => users.length
+              ? 'Users: ' + users.map(user => `\`${user}\``).join(', ')
+              : 'Users: (none)'
+            )
+            .catch(err => `Error listing users. ${err.message}.`)
+            .then(msg => message.channel.sendMessage(msg))
+            .catch(sendMessageError);
 
-              const users = Object.keys(data.users);
-              message.channel
-                .sendMessage(users.length
-                  ? `Users: ${users.map(user => `\`${user}\``).join(', ')}`
-                  : 'Users: (none)'
-                )
-                .catch(err =>
-                  winston.error('Cannot send message.', err)
-                );
-            });
-          }
           break;
+        }
 
-          case 'get': {
-            const id = tokens[2];
+        case 'get': {
+          const id = tokens[2];
 
-            if (id)
-              jsonfile.readFile(DATA_PATH, (err, data) => {
-                if (err)
-                  return message.channel
-                    .sendMessage(
-                      `Error getting user \`${id}\`!`
-                    )
-                    .catch(err =>
-                      winston.error('Cannot send message.', err)
-                    );
-
-                message.channel
-                  .sendMessage(data.users[id] !== undefined
-                    ? `User \`${id}\` (${format(data.users[id])} - ${moment(data.users[id]).fromNow()})`
-                    : `User \`${id}\` is not being tracked.`
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
-              });
-
-            else
-              jsonfile.readFile(DATA_PATH, (err, data) => {
-                if (err)
-                  return message.channel
-                    .sendMessage(
-                      'Error getting users!'
-                    )
-                    .catch(err =>
-                      winston.error('Cannot send message.', err)
-                    );
-
-                const users = Object.keys(data.users);
-                message.channel
-                  .sendMessage(users.length
-                    ? `Users: ${users.map(id => `\`${id}\` (${format(data.users[id])})`).join(', ')}`
-                    : 'Users: (none)'
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
-              });
+          if (!id) {
+            return message.channel
+              .sendMessage(`No \`id\` specified. See \`${command} help\` for more information.`)
+              .catch(sendMessageError);
           }
+
+          getUser(id)
+            .then(info => `User \`${id}\` (${format(info.date, true)}) (Last checked ${moment(info.timestamp).fromNow()}).`)
+            .catch(err => `Error getting user \`${id}\`. ${err.message}.`)
+            .then(msg => message.channel.sendMessage(msg))
+            .catch(sendMessageError);
+
           break;
+        }
 
-          case 'update': {
-            const id = tokens[2];
+        case 'bind': {
+          const id = tokens[2] || message.channel.id;
 
-            if (id)
-              getLastActive(id, (err, active) => {
-                if (err)
-                  return message.channel
-                    .sendMessage(
-                      `Error updating user \`${id}\`!`
-                    )
-                    .catch(err =>
-                      winston.error('Cannot send message.', err)
-                    );
+          addChannel(id)
+            .then(id => `Bound channel \`${id}\``)
+            .catch(err => `Error binding channel \`${id}\`. ${err.message}.`)
+            .then(msg => message.channel.sendMessage(msg))
+            .catch(sendMessageError);
 
-                message.channel
-                  .sendMessage(
-                    `User \`${active.username}\` updated (${format(active.date)} - ${moment(active.date).fromNow()}).`
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
-              });
-
-            else
-              updateLastActive((err, changes) => {
-                if (err)
-                  return message.channel
-                    .sendMessage(
-                      'Error updating users!'
-                    )
-                    .catch(err =>
-                      winston.error('Cannot send message.', err)
-                    );
-
-                message.channel
-                  .sendMessage(changes.length
-                    ? 'Updated users:' +
-                        changes.map(change => `\`${change.username}\` (${format(change.date)})`).join(', ')
-                    : 'Updated users: (no changes).'
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
-              });
-          }
           break;
+        }
 
-          case 'bind': {
-            const id = tokens[2] || message.channel.id;
-            addChannel(id, err => {
-              if (err)
-                return message.channel
-                  .sendMessage(
-                    'Error binding channel!'
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
+        case 'unbind': {
+          const id = tokens[2] || message.channel.id;
 
-              message.channel
-                .sendMessage(
-                  `Channel \`${id}\` bound.`
-                )
-                .catch(err =>
-                  winston.error('Cannot send message.', err)
-                );
-            });
-          }
+          deleteChannel(id)
+            .then(id => `Unbound channel \`${id}\``)
+            .catch(err => `Error unbinding channel \`${id}\`. ${err.message}.`)
+            .then(msg => message.channel.sendMessage(msg))
+            .catch(sendMessageError);
+
           break;
+        }
 
-          case 'unbind': {
-            const id = message.channel.id;
-            deleteChannel(id, err => {
-              if (err)
-                return message.channel
-                  .sendMessage(
-                    'Error unbinding channel!'
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
+        case 'channels': {
+          listChannels()
+            .then(channels => channels.length
+              ? 'Channels: ' + channels.map(channel => `\`${channel}\``).join(', ')
+              : 'Channels: (none)'
+            )
+            .catch(err => `Error listing channels. ${err.message}.`)
+            .then(msg => message.channel.sendMessage(msg))
+            .catch(sendMessageError);
 
-              message.channel
-                .sendMessage(
-                  `Channel \`${id}\` unbound.`
-                )
-                .catch(err =>
-                  winston.error('Cannot send message.', err)
-                );
-            });
-          }
           break;
+        }
 
-          case 'channels': {
-            jsonfile.readFile(DATA_PATH, (err, data) => {
-              if (err)
-                return message.channel
-                  .sendMessage(
-                    'Error listing channels!'
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
+        case 'start': {
+          const delay = +tokens[2] || options.delay;
 
-                const channels = Object.keys(data.channels);
-                message.channel
-                  .sendMessage(channels.length
-                    ? `Channels: ${channels.map(id => `\`${id}\``).join(', ')}`
-                    : 'Channels: (none)'
-                  )
-                  .catch(err =>
-                    winston.error('Cannot send message.', err)
-                  );
-            });
+          if (osuEmitter.status !== 'STOP') {
+            return message.channel
+              .sendMessage('Error starting interval. Interval already started.')
+              .catch(sendMessageError);
           }
+
+          osuEmitter.startInterval(delay);
+          message.channel
+            .sendMessage(`Interval started with delay \`${delay}ms\`.`)
+            .catch(sendMessageError);
+
           break;
+        }
 
-          case 'start': {
-            const delay = +tokens[2] || 3 * 60 * 1000;
-            startInterval(delay);
-            message.channel
-              .sendMessage(
-                `Interval started with delay \`${delay}\``
-              ).catch(err =>
-                winston.error('Cannot send message.', err)
-              );
+        case 'stop': {
+          if (osuEmitter.status === 'STOP') {
+            return message.channel
+              .sendMessage('Error stopping interval. Interval already stopped.')
+              .catch(sendMessageError);
           }
+
+          osuEmitter.stopInterval();
+          message.channel
+            .sendMessage('Interval stopped.')
+            .catch(sendMessageError);
+
           break;
+        }
 
-          case 'stop': {
-            stopInterval();
-            message.channel
-              .sendMessage(
-                'Interval stopped'
-              ).catch(err =>
-                winston.error('Cannot send message.', err)
-              );
-          }
+        // TODO
+        case 'update': {
+          updateAllUsers()
+            .then(({changes}) => changes.length
+              ? 'Changes: ' + changes.map(change => `\`${change.id}\` (${format(change.date, true)})`).join(', ')
+              : 'Changes: (none)'
+            )
+            .catch(err => `Error updating users. ${err.message}.`)
+            .then(msg => message.channel.sendMessage(msg))
+            .catch(sendMessageError);
+
           break;
         }
       }
     });
+
+    osuEmitter.on('change', (changes, errors) => {
+      for (const err of errors) {
+        winston.error('Could not fetch.', err);
+      }
+
+      if (changes.length) {
+        listChannels()
+          .then(channels => channels.forEach(id => {
+            const channel = bot.channels.get(id);
+            if (!channel) {
+              return winston.error(`Channel \`${id}\` not found.`);
+            }
+            for (const change of changes) {
+              channel
+                .sendMessage(`User \`${change.id}\` has come online (${format(change.date)}).`)
+                .catch(sendMessageError);
+            }
+          }));
+      }
+    });
+
+    osuEmitter.startInterval(options.delay);
   }
 };
