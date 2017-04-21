@@ -26,12 +26,13 @@ module.exports = {
         return;
       }
 
-      if (message.content === `${command} restart`) {
-        context = contextify();
-        return message.channel
-          .sendMessage('Context reset.')
-          .catch(messageError('send'));
-      }
+      // TODO
+      // if (message.content === `${command} restart`) {
+      //   context = contextify();
+      //   return message.channel
+      //     .sendMessage('Context reset.')
+      //     .catch(messageError('send'));
+      // }
 
       const match = message.content.match(regex);
       const code = match && match[1].trim();
@@ -42,23 +43,35 @@ module.exports = {
       let output;
       try {
         vm.runInContext('(a=>{message=a})', context)(message);
-        output = vm.runInContext(code, context, {
+        output = util.inspect(vm.runInContext(code, context, {
           filename: 'Discord',
           lineOffset: 0,
           columnOffset: 0,
           displayErrors: true,
           timeout: options.timeout
-        });
+        }));
       }
       catch (err) {
-        output = err;
+        if (/Script execution timed out/.test(err.message)) {
+          output = err.toString();
+        }
+
+        else {
+          const [message, ...stack] = err.stack.split('\n');
+          const [, line, column] = stack[0].match(/Discord:([0-9]+):([0-9]+)/);
+          output =
+            `${code.split('\n')[+line-1]}\n` +
+            `${' '.repeat(+column-1)}^\n` +
+            `${message}\n` +
+            stack.filter(desc => /Discord:[0-9]+:[0-9]+/.test(desc)).join('\n');
+        }
       }
 
       message
         .edit(
           `${command}` +
           `\`\`\`js\n${code}\n\`\`\`` +
-          `\`\`\`js\n${util.inspect(output)}\n\`\`\``
+          `\`\`\`js\n${output}\n\`\`\``
         )
         .catch(messageError('edit'));
     });
