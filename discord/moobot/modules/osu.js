@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const EventEmitter = require('events');
 const path = require('path');
 const request = require('request');
@@ -5,12 +6,9 @@ const cheerio = require('cheerio');
 const moment = require('moment-timezone');
 const winston = require('winston');
 const persist = require('../../../utils/persist');
+const messageError = require('../../messageError');
 
 const OSU_USER_URL = 'https://osu.ppy.sh/u/';
-
-function sendMessageError(err) {
-  winston.error('Could not send message.', err);
-}
 
 function getLastActive(id) {
   return new Promise((resolve, reject) => {
@@ -29,7 +27,6 @@ function getLastActive(id) {
       if (notFound) {
         return reject(new Error(`User \`${id}\` does not exist`));
       }
-
 
       // <div class="profile-username">
       //   Pillowfication
@@ -66,7 +63,7 @@ module.exports = {
   },
 
   init(bot, options) {
-    options = Object.assign({}, module.exports.defaults, options);
+    options = _.defaults(options, module.exports.defaults);
     const command = `${bot.config.prefix}${options.command}`;
     const data = persist(options.dataPath);
 
@@ -236,7 +233,7 @@ module.exports = {
               '  stop            Stop polling data\n' +
               '  update          Immediately invoke polling'
             )
-            .catch(sendMessageError);
+            .catch(messageError('send'));
           break;
         }
 
@@ -246,14 +243,14 @@ module.exports = {
           if (!id) {
             return message.channel
               .sendMessage(`No \`id\` specified. See \`${command} help\` for more information.`)
-              .catch(sendMessageError);
+              .catch(messageError('send'));
           }
 
           addUser(id)
-            .then(info => `Added \`${info.username}\` (${format(info.date, true)}).`)
+            .then(({username, date}) => `Added \`${username}\` (${format(date, true)}).`)
             .catch(err => `Error adding user \`${id}\`. ${err.message}.`)
             .then(msg => message.channel.sendMessage(msg))
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -264,14 +261,14 @@ module.exports = {
           if (!id) {
             return message.channel
               .sendMessage(`No \`id\` specified. See \`${command} help\` for more information.`)
-              .catch(sendMessageError);
+              .catch(messageError('send'));
           }
 
           deleteUser(id)
             .then(id => `Deleted \`${id}\`.`)
             .catch(err => `Error deleting user \`${id}\`. ${err.message}.`)
             .then(msg => message.channel.sendMessage(msg))
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -284,7 +281,7 @@ module.exports = {
             )
             .catch(err => `Error listing users. ${err.message}.`)
             .then(msg => message.channel.sendMessage(msg))
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -295,14 +292,14 @@ module.exports = {
           if (!id) {
             return message.channel
               .sendMessage(`No \`id\` specified. See \`${command} help\` for more information.`)
-              .catch(sendMessageError);
+              .catch(messageError('send'));
           }
 
           getUser(id)
-            .then(info => `User \`${id}\` (${format(info.date, true)}) (Last checked ${moment(info.timestamp).fromNow()}).`)
+            .then(({date, timestamp}) => `User \`${id}\` (${format(date, true)}) (Last checked ${moment(timestamp).fromNow()}).`)
             .catch(err => `Error getting user \`${id}\`. ${err.message}.`)
             .then(msg => message.channel.sendMessage(msg))
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -314,7 +311,7 @@ module.exports = {
             .then(id => `Bound channel \`${id}\``)
             .catch(err => `Error binding channel \`${id}\`. ${err.message}.`)
             .then(msg => message.channel.sendMessage(msg))
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -326,7 +323,7 @@ module.exports = {
             .then(id => `Unbound channel \`${id}\``)
             .catch(err => `Error unbinding channel \`${id}\`. ${err.message}.`)
             .then(msg => message.channel.sendMessage(msg))
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -339,7 +336,7 @@ module.exports = {
             )
             .catch(err => `Error listing channels. ${err.message}.`)
             .then(msg => message.channel.sendMessage(msg))
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -350,13 +347,13 @@ module.exports = {
           if (osuEmitter.status !== 'STOP') {
             return message.channel
               .sendMessage('Error starting interval. Interval already started.')
-              .catch(sendMessageError);
+              .catch(messageError('send'));
           }
 
           osuEmitter.startInterval(delay);
           message.channel
             .sendMessage(`Interval started with delay \`${delay}ms\`.`)
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -365,13 +362,13 @@ module.exports = {
           if (osuEmitter.status === 'STOP') {
             return message.channel
               .sendMessage('Error stopping interval. Interval already stopped.')
-              .catch(sendMessageError);
+              .catch(messageError('send'));
           }
 
           osuEmitter.stopInterval();
           message.channel
             .sendMessage('Interval stopped.')
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -380,12 +377,12 @@ module.exports = {
         case 'update': {
           updateAllUsers()
             .then(({changes}) => changes.length
-              ? 'Changes: ' + changes.map(change => `\`${change.id}\` (${format(change.date, true)})`).join(', ')
+              ? 'Changes: ' + changes.map(({id, date}) => `\`${id}\` (${format(date, true)})`).join(', ')
               : 'Changes: (none)'
             )
             .catch(err => `Error updating users. ${err.message}.`)
             .then(msg => message.channel.sendMessage(msg))
-            .catch(sendMessageError);
+            .catch(messageError('send'));
 
           break;
         }
@@ -407,7 +404,7 @@ module.exports = {
             for (const change of changes) {
               channel
                 .sendMessage(`User \`${change.id}\` has come online (${format(change.date)}).`)
-                .catch(sendMessageError);
+                .catch(messageError('send'));
             }
           }));
       }

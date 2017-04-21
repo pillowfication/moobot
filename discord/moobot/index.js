@@ -8,7 +8,7 @@ const bot = new Discord.Client();
 bot.config = botConfig;
 
 // Plug in modules
-require('./modules/moo').init(bot, {});
+require('./modules/moo').init(bot);
 require('./modules/osu').init(bot, {
   dataPath: path.join(__dirname, 'data', 'osu-data.json')
 });

@@ -1,54 +1,68 @@
+const _ = require('lodash');
 const mathjax = require('mathjax-node');
 const svg2png = require('svg2png');
 const winston = require('winston');
-
-const EX_SIZE = 12;
+const messageError = require('../../messageError');
 
 mathjax.config({displayErrors: true});
 mathjax.start();
 
-function typeset(math) {
+function typeset(math, exSize) {
   return new Promise((resolve, reject) => {
     mathjax.typeset({
       math: math,
-      ex: EX_SIZE,
+      ex: exSize,
       svg: true
     }, result => {
-      if (result.errors)
+      if (result.errors) {
         reject(new Error(result.errors.join('\n')));
-      else
+      }
+      else {
         resolve({
           svg: result.svg,
-          width: parseFloat(result.width) * EX_SIZE || 10,
-          height: parseFloat(result.height) * EX_SIZE || 10
+          width: parseFloat(result.width) * exSize || 10,
+          height: parseFloat(result.height) * exSize || 10
         });
+      }
     });
   });
 }
 
 module.exports = {
-  init(me) {
-    const regex = new RegExp(`^${me.prefix}math\\s+\`(.*)\``);
+  defaults: {
+    command: 'math',
+    exSize: 12
+  },
+
+  init(me, options) {
+    options = _.defaults(options, module.exports.defaults);
+    const command = `${me.config.prefix}${options.command}`;
+    const regex = new RegExp(`^${command}\\s+\`(.*)\``);
 
     me.on('message', message => {
-      if (message.author.id !== me.id)
+      if (message.author.id !== me.config.id || !message.content.startsWith(me.config.prefix)) {
         return;
+      }
 
       const match = message.content.match(regex);
       const math = match && match[1];
-      if (!math)
+      if (!math) {
         return;
+      }
 
-      typeset(math)
-        .then(result =>
-          svg2png(result.svg, {width: result.width, height: result.height})
-        )
+      typeset(math, options.exSize)
+        .then(({svg, width, height}) => svg2png(svg, {width, height}))
         .then(buffer =>
-          message.channel.sendFile(buffer)
+          message.channel
+            .sendFile(buffer)
+            .catch(err => winston.error('Could not send buffer.', err))
         )
-        .catch(err =>
-          winston.error('Could not generate TeX or send it.', err)
-        );
+        .catch(err => {
+          winston.error('Could not generate TeX.', err);
+          message.channel
+            .sendMessage(`Could not generate TeX. ${err.message}.`)
+            .catch(messageError('send'));
+        });
     });
   }
 };

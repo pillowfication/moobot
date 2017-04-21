@@ -1,21 +1,27 @@
-const winston = require('winston');
+const _ = require('lodash');
+const messageError = require('../../messageError');
 
 module.exports = {
-  init(me) {
+  defaults: {
+    command: 'ping'
+  },
+
+  init(me, options) {
+    options = _.defaults(options, module.exports.defaults);
+    const command = `${me.config.prefix}${options.command}`;
+
     me.on('message', message => {
-      if (message.author.id !== me.id || !message.content.startsWith(me.prefix))
+      if (message.author.id !== me.config.id || !message.content.startsWith(me.config.prefix)) {
         return;
+      }
 
-      if (message.content !== `${me.prefix}ping`)
-        return;
-
-      message.edit(`${message.content} pong`)
-        .then(message =>
-          message.edit(`${message.content} (${message.editedTimestamp - message.createdTimestamp}ms)`)
-        )
-        .catch(err =>
-          winston.error('Could not edit message.', err)
-        );
+      if (message.content === command) {
+        message.edit(`${message.content} pong`)
+          .then(({content, editedTimestamp, createdTimestamp}) =>
+            message.edit(`${content} (${editedTimestamp - createdTimestamp}ms)`)
+          )
+          .catch(messageError('edit'));
+      }
     });
   }
 };

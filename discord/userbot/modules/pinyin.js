@@ -1,4 +1,5 @@
-const winston = require('winston');
+const _ = require('lodash');
+const messageError = require('../../messageError');
 
 const tones = {
   a: {1: 'ā', 2: 'á', 3: 'ǎ', 4: 'à'},
@@ -18,8 +19,9 @@ const tones = {
 function addTone(word) {
   const chars = Array.from(word);
   const tone = chars.pop();
-  if (tone !== '1' && tone !== '2' && tone !== '3' && tone !== '4')
+  if (tone !== '1' && tone !== '2' && tone !== '3' && tone !== '4') {
     return word;
+  }
 
   // 1. 'A' and 'E' always take the tone mark
   for (let i = 0; i < chars.length; ++i) {
@@ -52,18 +54,25 @@ function addTone(word) {
 }
 
 module.exports = {
-  init(me) {
-    const command = `${me.prefix}pinyin`;
+  defaults: {
+    command: 'pinyin'
+  },
+
+  init(me, options) {
+    options = _.defaults(options, module.exports.defaults);
+    const command = `${me.config.prefix}${options.command}`;
     const regex = new RegExp(`^${command}\\s+(.*)`);
 
     me.on('message', message => {
-      if (message.author.id !== me.id || !message.content.startsWith(me.prefix))
+      if (message.author.id !== me.config.id || !message.content.startsWith(me.config.prefix)) {
         return;
+      }
 
       const match = message.content.match(regex);
-      const content = match && match[1];
-      if (!content)
+      const content = match && match[1].trim();
+      if (!content) {
         return;
+      }
 
       message
         .edit(
@@ -74,9 +83,7 @@ module.exports = {
             .map(addTone)
             .join('')
         )
-        .catch(err =>
-          winston.error('Could not edit message', err)
-        );
+        .catch(messageError('edit'));
     });
   }
 };
