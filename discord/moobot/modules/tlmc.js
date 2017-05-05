@@ -1,7 +1,14 @@
 const _ = require('lodash');
+const request = require('request');
 const messageError = require('../../messageError');
+const winston = require('winston');
 
 const TLMC_URL = 'http://tlmc.pf-n.co';
+const COUNT = 49207; // TODO: AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+
+function playError(err) {
+  winston.error('An error occurred trying to stream audio.', err);
+}
 
 module.exports = {
   defaults: {
@@ -11,6 +18,34 @@ module.exports = {
   init(bot, options) {
     options = _.defaults(options, module.exports.defaults);
     const command = `${bot.config.prefix}${options.command}`;
+
+    const player = {
+      currentSong: {
+        id: 0,
+        url: null,
+        info: null
+      },
+      queue: [],
+      setCurrentSong: function setCurrentSong(id) {
+        return new Promise((resolve, reject) => {
+          const index = id ? parseInt(id, 10) - 1 : COUNT * Math.random()|0;
+          id = index + 1;
+
+          request.get(`${TLMC_URL}/tlmc/info/${id}`, (err, res, body) => {
+            if (err || res.statusCode !== 200 || !body) {
+              return reject(err || new Error(res.statusMessage));
+            }
+            const song = JSON.parse(body);
+
+            player.currentSong.id = id;
+            player.currentSong.url = `${TLMC_URL}/tlmc/id/${id}`;
+            player.currentSong.info = song;
+
+            resolve(player.currentSong);
+          });
+        });
+      }
+    };
 
     const test = RegExp.prototype.test.bind(new RegExp(`^${command}\\s`));
 
@@ -26,6 +61,18 @@ module.exports = {
       const tokens = message.content.split(/\s+/);
       switch (tokens[1]) {
         case 'help': {
+          message.channel
+            .sendCode('',
+              `${command}\n` +
+              `See ${TLMC_URL} for all songs available\n` +
+              '  help            Print this message\n' +
+              '  play <id>       Play a song\n' +
+              '  info            Information about the current song\n' +
+              '  search <query>  TODO\n' +
+              '  queue <id>      TODO\n' +
+              '  skip            TODO'
+            )
+            .catch(messageError('send'));
           break;
         }
 
@@ -46,11 +93,26 @@ module.exports = {
 
           message.member.voiceChannel.join()
             .then(connection => {
-              connection.playArbitraryInput(`${TLMC_URL}/tlmc/id/${id}`);
-            })
-            .catch(() => {
-              console.log('wtf did I do')
+              player.setCurrentSong(id)
+                .then(currentSong => {
+                  connection.playArbitraryInput(currentSong.url);
+                  return `Playing #${id} - ${currentSong.info.title}`;
+                })
+                .catch(err => {
+                  playError(err);
+                  return `Error playing \`${id}\`. ${err.message}.`;
+                })
+                .then(msg => message.channel.sendMessage(msg))
+                .catch(messageError('send'));
             });
+
+          break;
+        }
+
+        case 'info': {
+          message.channel
+            .sendCode('', JSON.stringify(player.currentSong, null, 2))
+            .catch(messageError('send'));
 
           break;
         }

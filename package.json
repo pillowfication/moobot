@@ -27,6 +27,7 @@
     "lodash": "^4.17.4",
     "mathjax-node": "^1.0.1",
     "moment-timezone": "^0.5.13",
+    "node-opus": "^0.2.6",
     "prompt": "^1.0.0",
     "request": "^2.81.0",
     "svg2png": "^4.1.1",
