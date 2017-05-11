@@ -44,11 +44,12 @@ module.exports = {
                 .sendCode('',
                   `${command}\n` +
                   'See http://tlmc.pf-n.co for all songs available\n' +
-                  '  help   Print this message\n' +
-                  '  start  Join voice channel and initialize player\n' +
-                  '  skip   Skip the current song\n' +
-                  '  info   Display info about the current song\n' +
-                  '  bind   Use the current channel for bot commands'
+                  '  help     Print this message\n' +
+                  '  start    Join voice channel and initialize player\n' +
+                  '  skip     Skip the current song\n' +
+                  '  info     Display info about the current song\n' +
+                  '  destroy  Disconnect and cleanup\n' +
+                  '  bind     Use the current channel for bot commands'
                 )
                 .catch(messageError('send'));
               break;
@@ -145,6 +146,12 @@ module.exports = {
                 .catch(messageError('send'));
 
               break;
+            }
+
+            default: {
+              return message.channel
+                .sendMessage(`Unknown command. See \`${command} help\` for more information.`)
+                .catch(messageError('send'));
             }
           }
         });
