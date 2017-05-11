@@ -38,6 +38,13 @@ class TLMCPlayer {
 
     this.connection = connection;
     this.queue = [];
+    this.currentTrack = null;
+
+    this.playNextTrack()
+      .then(dispatcher => {
+        this._dispatcher = dispatcher;
+        dispatcher.on('end', this.playNextTrack.bind(this));
+      });
   }
 
   queueTrack(identifier) {
@@ -45,18 +52,18 @@ class TLMCPlayer {
       .then(info => this.queue.push(info));
   }
 
-  playNextSong() {
+  playNextTrack() {
+    console.log('PLAY NEXT TRACK')
     let queuedTrack = this.queue.shift();
     return (queuedTrack
       ? Promise.resolve(queuedTrack)
       : this.constructor.resolveTrackRandom())
-      .then(track => this._playSongUrl(track.url))
-      .then(dispatcher => {
-        dispatcher.on('end', this.playNextSong);
-      });
+      .then(track => this.currentTrack = track)
+      .then(track => {console.log(track); return track})
+      .then(track => this._playTrackUrl(track.url))
   }
 
-  _playSongUrl(url) {
+  _playTrackUrl(url) {
     return this.connection.playArbitraryInput(url);
   }
 

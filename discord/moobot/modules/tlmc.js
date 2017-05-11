@@ -56,10 +56,20 @@ module.exports = {
             .then(connection => {
               const player = new TLMCPlayer(connection);
               TLMCPlayers[message.guild.id] = player;
-              player.playNextSong();
             });
 
           break;
+        }
+
+        case 'skip': {
+          const player = TLMCPlayers[message.guild.id];
+          if (!player) {
+            return message.channel
+              .sendMessage(`No TLMCPlayer object found for this guild. See \`${command} help\` for more information.`)
+              .catch(messageError('send'));
+          }
+
+          player.playNextTrack();
         }
       }
     });
