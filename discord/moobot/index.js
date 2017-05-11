@@ -12,7 +12,9 @@ require('./modules/moo').init(bot);
 require('./modules/osu').init(bot, {
   dataPath: path.join(__dirname, 'data', 'osu-data.json')
 });
-require('./modules/tlmc').init(bot);
+require('./modules/tlmc').init(bot, {
+  dataPath: path.join(__dirname, 'data', 'tlmc-data.json')
+});
 require('./modules/userbot').init(bot);
 
 bot.on('ready', () => {

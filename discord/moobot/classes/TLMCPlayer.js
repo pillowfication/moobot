@@ -1,3 +1,4 @@
+const EventEmitter = require('events');
 const request = require('request');
 
 const TLMC_URL = 'http://tlmc.pf-n.co';
@@ -30,8 +31,10 @@ function getInfoRandom() {
   return getInfoById(index + 1);
 }
 
-class TLMCPlayer {
+class TLMCPlayer extends EventEmitter {
   constructor(connection) {
+    super();
+
     if (!connection) {
       throw new TypeError('Parameter `connection` is required');
     }
@@ -40,11 +43,13 @@ class TLMCPlayer {
     this.queue = [];
     this.currentTrack = null;
 
-    this.playNextTrack()
-      // .then(dispatcher => {
-      //   this._dispatcher = dispatcher;
-      //   dispatcher.on('end', this.playNextTrack.bind(this));
-      // });
+    this.on('trackEnd', () => {
+      if (this.connection) {
+        this.playNextTrack(true);
+      }
+    });
+
+    this.playNextTrack(true);
   }
 
   queueTrack(identifier) {
@@ -52,19 +57,33 @@ class TLMCPlayer {
       .then(info => this.queue.push(info));
   }
 
-  playNextTrack() {
-    console.log('PLAY NEXT TRACK')
+  playNextTrack(auto) {
+    const {dispatcher} = this.connection;
+    if (dispatcher && !dispatcher.destroyed) {
+      dispatcher.end();
+    }
+
+    if (!auto) {
+      return;
+    }
+
     let queuedTrack = this.queue.shift();
     return (queuedTrack
       ? Promise.resolve(queuedTrack)
       : this.constructor.resolveTrackRandom())
-      .then(track => this.currentTrack = track)
-      .then(track => {console.log(track); return track})
-      .then(track => this._playTrackUrl(track.url))
+      .then(track => {
+        this.currentTrack = track;
+        const dispatcher = this.connection.playArbitraryInput(track.url);
+        dispatcher.on('end', () => {
+          this.emit('trackEnd', track.url);
+        });
+      });
   }
 
-  _playTrackUrl(url) {
-    return this.connection.playArbitraryInput(url);
+  destroy() {
+    const connection = this.connection;
+    this.connection = null;
+    connection.disconnect();
   }
 
   static resolveTrack(identifier) {
