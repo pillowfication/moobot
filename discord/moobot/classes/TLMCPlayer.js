@@ -41,10 +41,10 @@ class TLMCPlayer {
     this.currentTrack = null;
 
     this.playNextTrack()
-      .then(dispatcher => {
-        this._dispatcher = dispatcher;
-        dispatcher.on('end', this.playNextTrack.bind(this));
-      });
+      // .then(dispatcher => {
+      //   this._dispatcher = dispatcher;
+      //   dispatcher.on('end', this.playNextTrack.bind(this));
+      // });
   }
 
   queueTrack(identifier) {
