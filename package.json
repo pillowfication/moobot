@@ -17,24 +17,15 @@
   },
   "main": "index.js",
   "scripts": {
-    "setup": "node scripts/setup.js"
+    "setup": "node scripts/setup.js",
+    "test": "standard"
   },
   "dependencies": {
-    "async": "^2.1.5",
-    "cheerio": "^0.22.0",
-    "discord.js": "^11.0.0",
-    "jsonfile": "^2.4.0",
-    "lodash": "^4.17.4",
-    "mathjax-node": "^1.0.1",
-    "moment-timezone": "^0.5.13",
-    "node-opus": "^0.2.6",
-    "prompt": "^1.0.0",
-    "request": "^2.81.0",
-    "svg2png": "^4.1.1",
-    "winston": "^2.3.1"
+    "discord.js": "^11.1.0"
   },
   "devDependencies": {
-    "eslint": "^3.18.0",
-    "eslint-config-pf": "1.0.7"
+    "jsonfile": "^3.0.1",
+    "prompt": "^1.0.0",
+    "standard": "^10.0.2"
   }
 }
