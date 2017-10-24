@@ -1,0 +1,40 @@
+{
+  "name": "moobot",
+  "version": "0.0.0",
+  "description": "moobot",
+  "author": {
+    "name": "Markus Tran",
+    "email": "thebluepillow@gmail.com",
+    "url": "http://pillowfication.com"
+  },
+  "homepage": "https://github.com/pillowfication/moobot",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pillowfication/moobot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pillowfication/moobot/issues"
+  },
+  "main": "index.js",
+  "scripts": {
+    "setup": "node scripts/setup.js"
+  },
+  "dependencies": {
+    "async": "^2.1.5",
+    "cheerio": "^0.22.0",
+    "discord.js": "^11.0.0",
+    "jsonfile": "^2.4.0",
+    "lodash": "^4.17.4",
+    "mathjax-node": "^1.0.1",
+    "moment-timezone": "^0.5.13",
+    "node-opus": "^0.2.6",
+    "prompt": "^1.0.0",
+    "request": "^2.81.0",
+    "svg2png": "^4.1.1",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.18.0",
+    "eslint-config-pf": "1.0.7"
+  }
+}

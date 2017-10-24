@@ -7,7 +7,7 @@ const CONFIG_PATH = path.join(__dirname, '..', 'config.json')
 let currSettings
 try {
   currSettings = jsonfile.readFileSync(CONFIG_PATH)
-} catch (err) {
+} catch (error) {
   currSettings = {}
 }
 
@@ -19,17 +19,17 @@ const schema = [{
 
 prompt.start()
 
-prompt.get(schema, (err, result) => {
-  if (err) {
-    console.log('Error resolving schemas.')
+prompt.get(schema, (error, result) => {
+  if (error) {
+    console.error('Error resolving schemas.')
     return
   }
 
   try {
     jsonfile.writeFileSync(CONFIG_PATH, result, { spaces: 2 })
     console.log(`Config created at '${CONFIG_PATH}'.`)
-  } catch (err) {
+  } catch (error) {
     console.log(`Error creating '${CONFIG_PATH}'. Please try again.`)
-    throw err
+    throw error
   }
 })
