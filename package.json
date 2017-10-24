@@ -21,7 +21,10 @@
     "test": "standard"
   },
   "dependencies": {
-    "discord.js": "^11.1.0"
+    "discord-plugins": "0.0.3",
+    "discord.js": "^11.1.0",
+    "svg2png": "^4.1.1",
+    "text-to-svg": "^3.1.3"
   },
   "devDependencies": {
     "jsonfile": "^3.0.1",
