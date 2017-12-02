@@ -30,6 +30,6 @@
   "devDependencies": {
     "jsonfile": "^3.0.1",
     "prompt": "^1.0.0",
-    "standard": "^10.0.2"
+    "standard": "^10.0.3"
   }
 }
