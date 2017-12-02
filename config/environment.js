@@ -3,7 +3,7 @@
 
 module.exports = function(environment) {
   let ENV = {
-    modulePrefix: 'moo',
+    modulePrefix: 'moobot',
     environment,
     rootURL: '/',
     locationType: 'auto',
