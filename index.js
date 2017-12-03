@@ -6,3 +6,5 @@ require('./src/moo')(client)
 
 client.on('ready', () => console.log('moobot ready'))
 client.login(require('./config').discordToken)
+
+module.exports = client
