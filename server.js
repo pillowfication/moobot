@@ -5,10 +5,10 @@ const PORT = process.argv[2] || process.env.MOOBOT_PORT || 80
 const app = express()
 app.use(require('cors')())
 
-let client = require('./index.js')
+let client = require('./index')
 
 app.get('/scores', (_, response) => {
-  let p = require('./database.js').getScores()
+  let p = require('./database').getScores()
   response.json({
     scores: p
   })
@@ -17,7 +17,7 @@ app.get('/scores', (_, response) => {
 app.get('/stats', (_, response) => {
   response.json({
     totalMoos: require('./database').get(),
-    numberOfServers: client.channels.size
+    numberOfServers: client.guilds.size
   })
 })
 
@@ -26,6 +26,7 @@ app.post('/moo', (_, response) => {
   for (const channel of channels) {
     if (channel[1].type === 'text') {
       channel[1].send('moo')
+      require('./database').inc()      
     }
   }
   response.json({
