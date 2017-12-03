@@ -35,6 +35,14 @@ app.post('/moo', (request, response) => {
   })
 })
 
+app.delete('/scores', (request, response) => {
+  let username = request.body.username
+  require('./database').reset(username)
+  response.json({
+    hi: 'hi'
+  })
+})
+
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`)
 })
