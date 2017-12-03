@@ -25,8 +25,8 @@ module.exports = {
     s(username)
   },
 
-  reset () {
-    moos = 0
-    scores = {}
+  reset (username) {
+    if (scores[username])
+      delete scores[username]
   }
 }
