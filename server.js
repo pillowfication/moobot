@@ -4,6 +4,7 @@ const PORT = process.argv[2] || process.env.MOOBOT_PORT || 80
 
 const app = express()
 app.use(require('cors')())
+app.use(require('body-parser').json())
 
 let client = require('./index')
 
@@ -22,7 +23,6 @@ app.get('/stats', (_, response) => {
 })
 
 app.post('/moo', (request, response) => {
-  console.log(request)
   let message = request.body.message
   let channels = client.channels
   for (const channel of channels) {
