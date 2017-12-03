@@ -43,6 +43,15 @@ app.delete('/scores', (request, response) => {
   })
 })
 
+app.patch('/scores', (request, response) => {
+  let username = request.body.username
+  let scores = request.body.scores
+  require('./database').changeScore(username, score)
+  response.json({
+    hi: 'hi'
+  })
+})
+
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`)
 })

@@ -28,5 +28,10 @@ module.exports = {
   reset (username) {
     if (scores[username])
       delete scores[username]
+  },
+
+  changeScore (username, score) {
+  	if (scores[username])
+  		scores[username] = score
   }
 }
