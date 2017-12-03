@@ -59,8 +59,8 @@ app.delete('/scores', (request, response) => {
 
 app.patch('/scores', (request, response) => {
   let username = request.body.username
-  let scores = request.body.scores
-  require('./database').changeScore(username, scores)
+  let score = request.body.score
+  require('./database').changeScore(username, score)
   response.json({
     hi: 'hi'
   })
