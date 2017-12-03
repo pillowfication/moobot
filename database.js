@@ -46,7 +46,7 @@ module.exports = {
       p.push({serverName: a, score: serverScores[a]})
     }
     return p.sort((a, b) => a.score > b.score ? -1 : 1)    
-  }
+  },
 
   incServerScore(serverName) {
     t(serverName)
