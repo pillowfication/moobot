@@ -16,9 +16,15 @@ app.get('/scores', (_, response) => {
 })
 
 app.get('/stats', (_, response) => {
+  let servers = client.guilds
+  let serverList = []
+  for (const server of servers) {
+    serverList.push(server[1].name)
+  }
   response.json({
     totalMoos: require('./database').get(),
-    numberOfServers: client.guilds.size
+    numberOfServers: servers.size,
+    serverList: serverList
   })
 })
 
