@@ -16,7 +16,7 @@ module.exports = {
   getScores () {
     const p = []
     for (const a in scores) {
-      p.push({username: a, score: s[a]})
+      p.push({username: a, score: scores[a]})
     }
     return p.sort((a, b) => a.score > b.score ? -1 : 1)
   },
