@@ -24,20 +24,29 @@ app.get('/stats', (_, response) => {
 
 app.post('/moo', (request, response) => {
   let message = request.body.message
-  let channels = client.channels
-  for (const channel of channels) {
-    if (channel[1].type === 'text') {
-      let members = channel[1].members
+  if (request.body.username) {
+    let username = request.body.username
+    let servers = client.guilds
+    for (const server of servers) {
+      let members = server[1].members
       for (const member of members) {
-        if (member[1].user.username === 'Pillowfication') {
-          channel[1].send(member + message)
+        if (member[1].user.username === username) {
+          member[1].user.send('asdf')
         }
       }
     }
+  } 
+  else {
+    let channels = client.channels    
+    for (const channel of channels) {
+      if (channel[1].type === 'text') {
+        channel[1].send(message)
+      }
+    }
+    response.json({
+      hi: 'hi'
+    })
   }
-  response.json({
-    hi: 'hi'
-  })
 })
 
 app.delete('/scores', (request, response) => {
