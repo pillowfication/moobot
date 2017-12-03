@@ -1,6 +1,6 @@
 
 const scores = {}
-const moos = 0
+let moos = 0
 
 function s (username) {
   scores[username] = (scores[username] || 0) + 1
