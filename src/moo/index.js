@@ -6,6 +6,7 @@ module.exports = function moo (client) {
     if (!message.author.bot && Math.random() < probability && mooRegex(message.content)) {
       require('../../database').inc()
       message.channel.send('moo')
+      require('../../database').incScore(message.author.username)
     }
   })
 }

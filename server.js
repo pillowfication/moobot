@@ -8,12 +8,9 @@ app.use(require('cors')())
 let client = require('./index.js')
 
 app.get('/scores', (_, response) => {
+  let p = require('./database.js').getScores()
   response.json({
-    scores: [
-      { username: 'Foo', score: 723 },
-      { username: 'Bar', score: 47 },
-      { username: 'Quux', score: 1 }
-    ]
+    scores: p
   })
 })
 
