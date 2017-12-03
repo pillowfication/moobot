@@ -17,7 +17,7 @@ app.get('/scores', (_, response) => {
 app.get('/stats', (_, response) => {
   response.json({
     totalMoos: require('./database').get(),
-    numberOfServers: Math.random() * 100 | 0
+    numberOfServers: client.channels.size
   })
 })
 
