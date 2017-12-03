@@ -21,11 +21,12 @@ app.get('/stats', (_, response) => {
   })
 })
 
-app.post('/moo', (_, response) => {
+app.post('/moo', (request, response) => {
+  let message = request.body.message
   let channels = client.channels
   for (const channel of channels) {
     if (channel[1].type === 'text') {
-      channel[1].send('moo')
+      channel[1].send(message)
       require('./database').inc()      
     }
   }
