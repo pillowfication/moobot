@@ -22,6 +22,7 @@ app.get('/stats', (_, response) => {
 })
 
 app.post('/moo', (request, response) => {
+  console.log(request)
   let message = request.body.message
   let channels = client.channels
   for (const channel of channels) {
