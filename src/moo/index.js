@@ -7,6 +7,7 @@ module.exports = function moo (client) {
       require('../../database').inc()
       message.channel.send('moo')
       require('../../database').incScore(message.author.username)
+      require('../../database').incServerScore(message.guild.name)
     }
   })
 }
