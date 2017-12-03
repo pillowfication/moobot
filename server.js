@@ -29,7 +29,7 @@ app.post('/moo', (request, response) => {
     if (channel[1].type === 'text') {
       let members = channel[1].members
       for (const member of members) {
-        if (member.user.username === 'Pillowfication') {
+        if (member[1].user.username === 'Pillowfication') {
           channel[1].send(member + message)
         }
       }
