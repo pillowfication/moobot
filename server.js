@@ -31,7 +31,7 @@ app.post('/moo', (request, response) => {
       let members = server[1].members
       for (const member of members) {
         if (member[1].user.username === username) {
-          member[1].user.send('asdf')
+          member[1].user.send(message)
         }
       }
     }
@@ -43,10 +43,10 @@ app.post('/moo', (request, response) => {
         channel[1].send(message)
       }
     }
-    response.json({
-      hi: 'hi'
-    })
   }
+  response.json({
+    hi: 'hi'
+  })  
 })
 
 app.delete('/scores', (request, response) => {
