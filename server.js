@@ -27,7 +27,12 @@ app.post('/moo', (request, response) => {
   let channels = client.channels
   for (const channel of channels) {
     if (channel[1].type === 'text') {
-      channel[1].send(message)
+      let members = channel[1].members
+      for (const member of members) {
+        if (member.user.username === 'Pillowfication') {
+          channel[1].send(member + message)
+        }
+      }
     }
   }
   response.json({
