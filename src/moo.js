@@ -4,10 +4,7 @@ module.exports = function moo (client) {
 
   client.on('message', message => {
     if (!message.author.bot && Math.random() < probability && mooRegex(message.content)) {
-      require('../../database').inc()
       message.channel.send('moo')
-      require('../../database').incScore(message.author.username)
-      require('../../database').incServerScore(message.guild.name)
     }
   })
 }
