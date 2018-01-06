@@ -17,12 +17,12 @@ module.exports = function _eval (client) {
     if (message.content === '~/eval reset') {
       getContext(message.channel.id).reset()
       message.channel.send('Context reset.')
-    } else if (message.content.startsWith('~/eval') /* && message.author.id === ID */) {
+    } else if (message.content.startsWith('~/eval')) {
       const match = message.content.match(/```(?:js\n)?([\s\S]*)```/)
       if (match) {
         const context = getContext(message.channel.id)
         const code = match[1]
-        const result = context.eval(code, { message }) // Note: `message` contains references to the entire client
+        const result = context.eval(code, { require, message })
         message.channel.send(result.prettyOutput.substring(0, 100), { code: 'js' })
       } else {
         message.channel.send('No code block found to eval.')
