@@ -1,4 +1,4 @@
-const { DiscordVM } = require('discord-plugins')
+const { DiscordVM } = require('discord-plugins').eval
 
 module.exports = function _eval (client) {
   const contexts = {}
