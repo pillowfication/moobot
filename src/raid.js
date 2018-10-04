@@ -1,7 +1,7 @@
 const CronJob = require('cron').CronJob
 
 module.exports = function raid (client) {
-  const raidTime = new CronJob('30 21 * * TUE', () => {
+  const raidTime = new CronJob('0 30 21 * * 2,4', () => {
     const squadSpam = client.channels.get('464421227713527808')
     if (!squadSpam) {
       console.error('yo wtf')
