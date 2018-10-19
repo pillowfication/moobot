@@ -19,7 +19,7 @@ module.exports = function _eval (client) {
       message.channel.send('Context reset.')
     } else if (message.content.startsWith('~/eval')) {
       try {
-        const match = message.content.match(/```(?:(js|javascript)\n)?([\s\S]*)```/)
+        const match = message.content.match(/`[\s\S]*/)
         if (match) {
           const context = getContext(message.channel.id)
           const code = match[1]
