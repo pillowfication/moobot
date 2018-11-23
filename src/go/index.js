@@ -6,12 +6,17 @@ module.exports = function go (client) {
       const [ cmd, ...args ] = message.content.substr('~/go'.length).trim().split(/\s+/)
       switch (cmd) {
         case 'start':
+          if (matches[message.channel.id]) {
+            message.channel.send('A match has already been started in this channel')
+            break
+          }
+
           let [ p1, p2 ] = args.slice(0, 2).map(p => {
             let match = p.match(/^<@([0-9]+)>$/)
             return match ? match[1] : undefined
           })
           if (!p1 || !p2) {
-            message.channel.send('Error: Specify two players to play.\n```~/go start <p1> <p2>```')
+            message.channel.send('Specify two players to play.\n```~/go start <p1> <p2>```')
           } else {
             message.channel.send('Confirm the match with `~/go join`.')
             matches[message.channel.id] = {
@@ -29,7 +34,7 @@ module.exports = function go (client) {
                 message.channel.send('Match not confirmed. Deleting match.')
                 matches[message.channel.id] = undefined
               }
-            }, 5 * 60 * 1000)
+            }, 60 * 1000)
           }
           break
 
@@ -43,13 +48,13 @@ module.exports = function go (client) {
             if (!player) {
               message.channel.send('You are not invited to play this match.')
             } else if (player.status === 'ACTIVE') {
-              message.channel.send('You have already confirmed the match.')
+              message.channel.send('You have already confirmed participation in the match.')
             } else {
               message.channel.send('You have confirmed participation in the match.')
               player.status = 'ACTIVE'
-              
+
               let status = 'ACTIVE'
-              for (const player of matches[message.channel.id]) {
+              for (const player of matches[message.channel.id].players) {
                 if (player.status === 'PENDING') {
                   status = 'PENDING'
                 }
@@ -61,7 +66,7 @@ module.exports = function go (client) {
             }
           }
           break
-          
+
         case 'move':
           break
       }
