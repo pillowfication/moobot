@@ -36,9 +36,8 @@ app.post('/moo', (request, response) => {
         }
       }
     }
-  } 
-  else {
-    let channels = client.channels    
+  } else {
+    let channels = client.channels
     for (const channel of channels) {
       if (channel[1].type === 'text') {
         channel[1].send(message)
@@ -47,7 +46,7 @@ app.post('/moo', (request, response) => {
   }
   response.json({
     hi: 'hi'
-  })  
+  })
 })
 
 app.delete('/scores', (request, response) => {
