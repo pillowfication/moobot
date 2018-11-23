@@ -14,7 +14,7 @@ module.exports = function go (client) {
             message.channel.send('Error: Specify two players to play.\n```~/go start <p1> <p2>```')
           } else {
             message.channel.send('Confirm the match with `~/go join`.')
-            matches[channel.id] = {
+            matches[message.channel.id] = {
               status: 'PENDING',
               players: [{
                 id: p1,
@@ -25,21 +25,21 @@ module.exports = function go (client) {
               }]
             }
             setTimeout(() => {
-              if (matches[channel.id].status === 'PENDING') {
+              if (matches[message.channel.id].status === 'PENDING') {
                 message.channel.send('Match not confirmed. Deleting match.')
-                matches[channel.id] = undefined
+                matches[message.channel.id] = undefined
               }
             }, 5 * 60 * 1000)
           }
           break
 
         case 'join':
-          if (!matches[channel.id]) {
+          if (!matches[message.channel.id]) {
             message.channel.send('A match has not been started in this channel.')
-          } else if (matches[channel.id].status === 'ACTIVE') {
+          } else if (matches[message.channel.id].status === 'ACTIVE') {
             message.channel.send('A match has already started in this channel.')
           } else {
-            const player = matches[channel.id].players.find(p => p.id === message.author.id)
+            const player = matches[message.channel.id].players.find(p => p.id === message.author.id)
             if (!player) {
               message.channel.send('You are not invited to play this match.')
             } else if (player.status === 'ACTIVE') {
@@ -49,14 +49,14 @@ module.exports = function go (client) {
               player.status = 'ACTIVE'
               
               let status = 'ACTIVE'
-              for (const player of matches[channel.id]) {
+              for (const player of matches[message.channel.id]) {
                 if (player.status === 'PENDING') {
                   status = 'PENDING'
                 }
               }
               if (status === 'ACTIVE') {
                 message.channel.send('All participants have confirmed participation. Match is starting.')
-                matches[channel.id].status = 'ACTIVE'
+                matches[message.channel.id].status = 'ACTIVE'
               }
             }
           }
