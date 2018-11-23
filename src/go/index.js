@@ -6,7 +6,10 @@ module.exports = function go (client) {
       const [ cmd, ...args ] = message.content.substr('~/go'.length).trim().split(/\s+/)
       switch (cmd) {
         case 'start':
-          let [ p1, p2 ] = args
+          let [ p1, p2 ] = args.slice(0, 2).map(p => {
+            let match = p.match(/^<@([0-9]+)>$/)
+            return match ? match[1] : undefined
+          })
           if (!p1 || !p2) {
             message.channel.send('Error: Specify two players to play.\n```~/go start <p1> <p2>```')
           } else {
