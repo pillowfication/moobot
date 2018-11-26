@@ -197,7 +197,7 @@ class Game2P {
         const self = player === 0 ? this.player0 : this.player1
         self.r = move.r
         self.c = move.c
-        this.turnCounter += 2
+        ++this.turnCounter
       } else {
         throw new Error('You cannot move there.')
       }
@@ -209,7 +209,7 @@ class Game2P {
       if (this._canPlaceWall(move.orientation, move.r, move.c)) {
         this.placedWalls.set(`${move.r},${move.c}`, { r: move.r, c: move.c, orientation: move.orientation })
         --self.walls
-        this.turnCounter += 2
+        ++this.turnCounter
       } else {
         throw new Error('You cannot place a wall there.')
       }

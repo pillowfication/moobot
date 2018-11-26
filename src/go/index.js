@@ -99,7 +99,7 @@ module.exports = function go (client) {
                   status = 'PENDING'
                 }
               }
-              if (true || status === 'ACTIVE') {
+              if (status === 'ACTIVE') {
                 message.channel.send('All participants have confirmed participation. Match is starting.')
                 matches[message.channel.id].status = 'ACTIVE'
                 matches[message.channel.id].game = new Game2P(9, 9, 10)
