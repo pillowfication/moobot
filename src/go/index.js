@@ -1,44 +1,20 @@
+const { createCanvas } = require('canvas')
 const Game2P = require('./Game2P')
-const { suggest } = require('./ai2')
+const { suggest } = require('./ai')
 
 const matches = {}
 
 function sendBoard (channel) {
   const game = matches[channel.id].game
-  const board = []
-  for (let r = 0; r < 9; ++r) {
-    let row = (board[r << 1] = [])
-    for (let c = 0; c < 9; ++c) {
-      row[c << 1] =
-        (game.player0.r === r && game.player0.c === c) ? '1'
-          : (game.player1.r === r && game.player1.c === c) ? '2' : '·'
-    }
-  }
-  for (let r = 0; r < 8; ++r) {
-    board[(r << 1) | 1] = []
-  }
-  for (const wall of game.placedWalls.values()) {
-    let r = (wall.r << 1) | 1
-    let c = (wall.c << 1) | 1
-    if (wall.orientation === Game2P.WALL_HORIZONTAL) {
-      board[r][c - 1] = '―'
-      board[r][c] = '―'
-      board[r][c + 1] = '―'
-    } else /* if (wall.orientation === Game2P.WALL_VERTICAL) */ {
-      board[r - 1][c] = '|'
-      board[r][c] = '|'
-      board[r + 1][c] = '|'
-    }
-  }
-  const boardString = board.map((row, r) => {
-    let str = (r & 1) === 0 ? (9 - (r >> 1)) + ' ' : '  '
-    for (let i = 0; i < 17; ++i) {
-      str += row[i] || ' '
-    }
-    return str
-  }).join('\n') + '\n\n  a b c d e f g h i'
+  const canvas = createCanvas(200, 200)
+  const ctx = canvas.getContext('2d')
 
-  channel.send(`\`\`\`\nPlayer ${(game.turnCounter & 1) + 1}'s turn.\n\nP1 Walls: ${game.player0.walls}\nP2 Walls: ${game.player1.walls}\n\n${boardString}\n\`\`\``)
+  ctx.fillStyle = '#FFFFFF'
+  ctx.fillRect(0, 0, 200, 200)
+  ctx.strokeStyle = '#BBBBBB'
+  ctx.strokeRect(10, 10, 180, 180)
+
+  channel.send(`\`\`\`\nPlayer ${(game.turnCounter & 1) + 1}'s turn.\n\nP1 Walls: ${game.player0.walls}\nP2 Walls: ${game.player1.walls}\n\`\`\``, canvas.createPNGStream())
 
   setTimeout(() => doAIStuff(channel), 0)
 }

@@ -516,4 +516,7 @@ function suggest (game2p, timeout) {
   })
 }
 
-module.exports = { suggest }
+module.exports = {
+  playGame,
+  suggest
+}
