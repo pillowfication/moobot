@@ -1,4 +1,5 @@
 const Game2P = require('./Game2P')
+const { suggest } = require('./ai2')
 
 const matches = {}
 
@@ -38,11 +39,30 @@ function sendBoard (channel) {
   }).join('\n') + '\n\n  a b c d e f g h i'
 
   channel.send(`\`\`\`\nPlayer ${(game.turnCounter & 1) + 1}'s turn.\n\nP1 Walls: ${game.player0.walls}\nP2 Walls: ${game.player1.walls}\n\n${boardString}\n\`\`\``)
+
+  doAIStuff(channel)
+}
+
+function doAIStuff (channel) {
+  const game = matches[channel.id]
+  if (game._ai.bot && (game.turnCounter & 1) === game._ai.bot - 1) {
+    const bestMove = suggest(game)
+    if (bestMove & (0b11 << 8)) {
+      const orientation = (bestMove & (1 << 8)) ? 'h' : 'v'
+      const row = 9 - (bestMove & 0b00001111)
+      const col = String.fromCharCode(97 + ((bestMove & 0b11110000) >> 4))
+      channel.send(`~/go move W${col}${row}${orientation}`)
+    } else {
+      const row = 9 - (bestMove & 0b00001111)
+      const col = String.fromCharCode(97 + ((bestMove & 0b11110000) >> 4))
+      channel.send(`~/go move ${col}${row}`)
+    }
+  }
 }
 
 module.exports = function go (client) {
   client.on('message', message => {
-    if (!message.author.bot && message.content.startsWith('~/go')) {
+    if (message.content.startsWith('~/go')) {
       const [ cmd, ...args ] = message.content.substr('~/go'.length).trim().split(/\s+/)
       switch (cmd) {
         case 'start':
@@ -58,16 +78,35 @@ module.exports = function go (client) {
           if (!p1 || !p2) {
             message.channel.send('Specify two players to play.\n```~/go start <p1> <p2>```')
           } else {
+            let bot
+            let difficulty = args[2]
+            if (p1 === '223864853465399296') {
+              bot = 1
+            } else if (p2 === '223864853465399296') {
+              bot = 2
+            }
+            if (bot) {
+              if (!difficulty) {
+                return message.channel.send('No difficulty specified.')
+              } else {
+                difficulty = Math.min(Math.max(Number(difficulty || 1), 0), 5 * 60 * 1000)
+                message.channel.send(`Starting match against AI with difficulty = ${difficulty}.`)
+              }
+            }
             message.channel.send('Confirm the match with `~/go join`.')
             matches[message.channel.id] = {
               status: 'PENDING',
               players: [{
                 id: p1,
-                status: 'PENDING'
+                status: bot === 1 ? 'ACTIVE' : 'PENDING'
               }, {
                 id: p2,
-                status: 'PENDING'
-              }]
+                status: bot === 2 ? 'ACTIVE' : 'PENDING'
+              }],
+              _ai: {
+                bot,
+                difficulty
+              }
             }
             setTimeout(() => {
               if (matches[message.channel.id].status === 'PENDING') {
@@ -131,6 +170,18 @@ module.exports = function go (client) {
                     { type: Game2P.MOVE_PLAYER, r, c }
                   )
                   sendBoard(message.channel)
+
+                  const game = matches[message.channel.id].game
+                  let winner
+                  if (game.player0.r === 0) {
+                    winner = 'Player 1'
+                  } else if (game.player1.r === 8) {
+                    winner = 'Player 2'
+                  }
+                  if (winner) {
+                    message.channel.send(`${winner} wins!`)
+                    delete matches[message.channel.id]
+                  }
                 } catch (error) {
                   message.channel.send(error.message)
                 }
@@ -156,6 +207,16 @@ module.exports = function go (client) {
                 message.channel.send('Could not parse your move')
               }
             }
+          }
+          break
+
+        case 'stop':
+          const player = matches[message.channel.id].players.findIndex(p => p.id === message.author.id)
+          if (player === -1) {
+            message.channel.send('You are not participating in this match.')
+          } else {
+            message.channel.send('Game cancelled.')
+            delete matches[message.channel.id]
           }
           break
       }

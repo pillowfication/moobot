@@ -304,7 +304,7 @@ module.exports = function suggest (game2p) {
   // return getHighestMove(_game, 1)
 
   while (Math.abs(_game.getScore()) < 90000) {
-    let m = getHighestMove(_game, 3)
+    let m = getHighestMove(_game, 1)
     console.log(m)
     _game.exec(m)
   }
