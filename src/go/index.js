@@ -40,13 +40,16 @@ function sendBoard (channel) {
 
   channel.send(`\`\`\`\nPlayer ${(game.turnCounter & 1) + 1}'s turn.\n\nP1 Walls: ${game.player0.walls}\nP2 Walls: ${game.player1.walls}\n\n${boardString}\n\`\`\``)
 
-  doAIStuff(channel)
+  setTimeout(() => doAIStuff(channel), 0)
 }
 
 function doAIStuff (channel) {
   const game = matches[channel.id]
-  if (game._ai.bot && (game.turnCounter & 1) === game._ai.bot - 1) {
-    const bestMove = suggest(game)
+
+  if (game._ai.bot && (game.game.turnCounter & 1) === game._ai.bot - 1) {
+console.log('doing ai stuff')
+    suggest(game.game, game._ai.difficulty).then(bestMove => {
+console.log('got a move to play')
     if (bestMove & (0b11 << 8)) {
       const orientation = (bestMove & (1 << 8)) ? 'h' : 'v'
       const row = 9 - (bestMove & 0b00001111)
@@ -56,7 +59,7 @@ function doAIStuff (channel) {
       const row = 9 - (bestMove & 0b00001111)
       const col = String.fromCharCode(97 + ((bestMove & 0b11110000) >> 4))
       channel.send(`~/go move ${col}${row}`)
-    }
+    } })
   }
 }
 

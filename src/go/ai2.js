@@ -410,17 +410,17 @@ function playGame (timeout) {
   }
 }
 
-function suggest (game2p, timeout) {
+function suggest (game2p, timeout) { return new Promise((resolve, reject) => {
   const game = createGame()
   for (const wall of game2p.placedWalls.values()) {
     const wallCoord = (wall.r << 0) + (wall.c << 4)
-    if (wall.orientation === 10) {
+    if (wall.orientation === 0) {
       game.cells[wallCoord + (0 << 0) + (0 << 4)] ^= FLAG_EDGE_DN
       game.cells[wallCoord + (0 << 0) + (1 << 4)] ^= FLAG_EDGE_DN
       game.cells[wallCoord + (1 << 0) + (0 << 4)] ^= FLAG_EDGE_UP
       game.cells[wallCoord + (1 << 0) + (1 << 4)] ^= FLAG_EDGE_UP
     }
-    if (wall.orientation === 11) {
+    if (wall.orientation === 1) {
       game.cells[wallCoord + (0 << 0) + (0 << 4)] ^= FLAG_EDGE_RT
       game.cells[wallCoord + (1 << 0) + (0 << 4)] ^= FLAG_EDGE_RT
       game.cells[wallCoord + (0 << 0) + (1 << 4)] ^= FLAG_EDGE_LT
@@ -485,7 +485,9 @@ function suggest (game2p, timeout) {
   let depth = 0
   let depthIndex = 0
 
-  do {
+function doingIt () { return new Promise((resolve2, reject) => {
+function _(){  setTimeout(() => {
+
     growLeaves(tree, depth, depthIndex)
     ++depthIndex
     if (depthIndex === tree[depth].length) {
@@ -494,9 +496,16 @@ function suggest (game2p, timeout) {
       shuffle(tree[depth])
       tree[depth + 1] = []
     }
-  } while (Date.now() - start < timeout)
-  // } while (depth < 5)
+    if (Date.now() - start < timeout)
+      _()
+    else
+      resolve2('foobar')
 
+  }, 0) }; _();
+}) }
+
+doingIt().then((v) => {
+console.log(v)
   const root = tree[0][0]
   const childrenScores = root.children.map(child => getNodeCumScore(child, (root.game.turnCounter & 1) + 1))
   const incentiveFunc = (root.game.turnCounter & 1) === 0 ? Math.max : Math.min
@@ -507,7 +516,9 @@ function suggest (game2p, timeout) {
   }, [])
   const bestMove = bestMoves[bestMoves.length * Math.random() | 0]
 
-  return bestMove
+  resolve(bestMove)
+})
+})
 }
 
 module.exports = { suggest }
