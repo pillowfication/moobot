@@ -410,115 +410,110 @@ function playGame (timeout) {
   }
 }
 
-function suggest (game2p, timeout) { return new Promise((resolve, reject) => {
-  const game = createGame()
-  for (const wall of game2p.placedWalls.values()) {
-    const wallCoord = (wall.r << 0) + (wall.c << 4)
-    if (wall.orientation === 0) {
-      game.cells[wallCoord + (0 << 0) + (0 << 4)] ^= FLAG_EDGE_DN
-      game.cells[wallCoord + (0 << 0) + (1 << 4)] ^= FLAG_EDGE_DN
-      game.cells[wallCoord + (1 << 0) + (0 << 4)] ^= FLAG_EDGE_UP
-      game.cells[wallCoord + (1 << 0) + (1 << 4)] ^= FLAG_EDGE_UP
-    }
-    if (wall.orientation === 1) {
-      game.cells[wallCoord + (0 << 0) + (0 << 4)] ^= FLAG_EDGE_RT
-      game.cells[wallCoord + (1 << 0) + (0 << 4)] ^= FLAG_EDGE_RT
-      game.cells[wallCoord + (0 << 0) + (1 << 4)] ^= FLAG_EDGE_LT
-      game.cells[wallCoord + (1 << 0) + (1 << 4)] ^= FLAG_EDGE_LT
-    }
-    game.walls[wallCoord] = true
-  }
-  game.player0 = (game2p.player0.r << 0) | (game2p.player0.c << 4)
-  game.player1 = (game2p.player1.r << 0) | (game2p.player1.c << 4)
-  game.player0Walls = game2p.player0.walls
-  game.player1Walls = game2p.player1.walls
-  game.turnCounter = game2p.turnCounter
-
-  function growLeaves (tree, depth, depthIndex) {
-    const node = tree[depth][depthIndex]
-    const game = cloneGame(tree[0][0].game)
-    const parents = []
-    let currNode = node
-    while (currNode.parent) {
-      parents.push(currNode)
-      currNode = currNode.parent
-    }
-    for (let i = parents.length - 1; i >= 0; --i) executeMove(game, parents[i].move)
-
-    if ((game.player0 & 0b1111) === (0 << 0) ||
-        (game.player1 & 0b1111) === (8 << 0)) return
-
-    let validMoves
-    if ((game.turnCounter & 1) === 0) {
-      validMoves = getValidMovesPlayer(game, game.player0, game.player1)
-      if (game.player0Walls > 0) validMoves = validMoves.concat(getValidMovesWall(game))
-    } else {
-      validMoves = getValidMovesPlayer(game, game.player1, game.player0)
-      if (game.player1Walls > 0) validMoves = validMoves.concat(getValidMovesWall(game))
-    }
-
-    for (let i = 0, l = validMoves.length; i < l; ++i) {
-      const move = validMoves[i]
-      const nextGame = cloneGame(game)
-      executeMove(nextGame, move)
-      const nextNode = {
-        move,
-        score: getScore(nextGame),
-        children: [],
-        parent: node
+function suggest (game2p, timeout) {
+  return new Promise((resolve, reject) => {
+    const game = createGame()
+    for (const wall of game2p.placedWalls.values()) {
+      const wallCoord = (wall.r << 0) | (wall.c << 4)
+      if (wall.orientation === 0) {
+        game.cells[wallCoord + (0 << 0) + (0 << 4)] ^= FLAG_EDGE_DN
+        game.cells[wallCoord + (0 << 0) + (1 << 4)] ^= FLAG_EDGE_DN
+        game.cells[wallCoord + (1 << 0) + (0 << 4)] ^= FLAG_EDGE_UP
+        game.cells[wallCoord + (1 << 0) + (1 << 4)] ^= FLAG_EDGE_UP
       }
-      node.children.push(nextNode)
-      tree[depth + 1].push(nextNode)
+      if (wall.orientation === 1) {
+        game.cells[wallCoord + (0 << 0) + (0 << 4)] ^= FLAG_EDGE_RT
+        game.cells[wallCoord + (1 << 0) + (0 << 4)] ^= FLAG_EDGE_RT
+        game.cells[wallCoord + (0 << 0) + (1 << 4)] ^= FLAG_EDGE_LT
+        game.cells[wallCoord + (1 << 0) + (1 << 4)] ^= FLAG_EDGE_LT
+      }
+      game.walls[wallCoord] = true
     }
-  }
+    game.player0 = (game2p.player0.r << 0) | (game2p.player0.c << 4)
+    game.player1 = (game2p.player1.r << 0) | (game2p.player1.c << 4)
+    game.player0Walls = game2p.player0.walls
+    game.player1Walls = game2p.player1.walls
+    game.turnCounter = game2p.turnCounter
 
-  function getNodeCumScore (node, depth) {
-    if (node.children.length === 0) return node.score
+    function growLeaves (tree, depth, depthIndex) {
+      const node = tree[depth][depthIndex]
+      const game = cloneGame(tree[0][0].game)
+      const parents = []
+      let currNode = node
+      while (currNode.parent) {
+        parents.push(currNode)
+        currNode = currNode.parent
+      }
+      for (let i = parents.length - 1; i >= 0; --i) executeMove(game, parents[i].move)
 
-    const childrenScores = node.children.map(child => getNodeCumScore(child, depth + 1))
-    const incentiveFunc = (depth & 1) === 0 ? Math.max : Math.min
-    return incentiveFunc(...childrenScores)
-  }
+      if ((game.player0 & 0b1111) === (0 << 0) ||
+          (game.player1 & 0b1111) === (8 << 0)) return
 
-  const start = Date.now()
-  const tree = [ [ { game, score: getScore(game), children: [] } ], [] ]
-  let depth = 0
-  let depthIndex = 0
+      let validMoves
+      if ((game.turnCounter & 1) === 0) {
+        validMoves = getValidMovesPlayer(game, game.player0, game.player1)
+        if (game.player0Walls > 0) validMoves = validMoves.concat(getValidMovesWall(game))
+      } else {
+        validMoves = getValidMovesPlayer(game, game.player1, game.player0)
+        if (game.player1Walls > 0) validMoves = validMoves.concat(getValidMovesWall(game))
+      }
 
-function doingIt () { return new Promise((resolve2, reject) => {
-function _(){  setTimeout(() => {
-
-    growLeaves(tree, depth, depthIndex)
-    ++depthIndex
-    if (depthIndex === tree[depth].length) {
-      depthIndex = 0
-      ++depth
-      shuffle(tree[depth])
-      tree[depth + 1] = []
+      for (let i = 0, l = validMoves.length; i < l; ++i) {
+        const move = validMoves[i]
+        const nextGame = cloneGame(game)
+        executeMove(nextGame, move)
+        const nextNode = {
+          move,
+          score: getScore(nextGame),
+          children: [],
+          parent: node
+        }
+        node.children.push(nextNode)
+        tree[depth + 1].push(nextNode)
+      }
     }
-    if (Date.now() - start < timeout)
-      _()
-    else
-      resolve2('foobar')
 
-  }, 0) }; _();
-}) }
+    function getNodeCumScore (node, depth) {
+      if (node.children.length === 0) return node.score
 
-doingIt().then((v) => {
-console.log(v)
-  const root = tree[0][0]
-  const childrenScores = root.children.map(child => getNodeCumScore(child, (root.game.turnCounter & 1) + 1))
-  const incentiveFunc = (root.game.turnCounter & 1) === 0 ? Math.max : Math.min
-  const bestScore = incentiveFunc(...childrenScores)
-  const bestMoves = root.children.reduce((acc, child, i) => {
-    if (childrenScores[i] === bestScore) acc.push(child.move)
-    return acc
-  }, [])
-  const bestMove = bestMoves[bestMoves.length * Math.random() | 0]
+      const childrenScores = node.children.map(child => getNodeCumScore(child, depth + 1))
+      const incentiveFunc = (depth & 1) === 0 ? Math.max : Math.min
+      return incentiveFunc(...childrenScores)
+    }
 
-  resolve(bestMove)
-})
-})
+    const start = Date.now()
+    const tree = [ [ { game, score: getScore(game), children: [] } ], [] ]
+    let depth = 0
+    let depthIndex = 0
+
+    ;(function looper () {
+      setTimeout(() => {
+        growLeaves(tree, depth, depthIndex)
+        ++depthIndex
+        if (depthIndex === tree[depth].length) {
+          depthIndex = 0
+          ++depth
+          shuffle(tree[depth])
+          tree[depth + 1] = []
+        }
+        if (Date.now() - start < timeout) {
+          looper()
+        } else {
+          const root = tree[0][0]
+          const childrenScores = root.children.map(child => getNodeCumScore(child, (root.game.turnCounter & 1) + 1))
+          const incentiveFunc = (root.game.turnCounter & 1) === 0 ? Math.max : Math.min
+          const bestScore = incentiveFunc(...childrenScores)
+          const bestMoves = root.children.reduce((acc, child, i) => {
+            if (childrenScores[i] === bestScore) acc.push(child.move)
+            return acc
+          }, [])
+          const bestMove = bestMoves[bestMoves.length * Math.random() | 0]
+
+          resolve(bestMove)
+        }
+      }, 0)
+    })()
+  })
 }
 
 module.exports = { suggest }

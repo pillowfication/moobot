@@ -47,19 +47,18 @@ function doAIStuff (channel) {
   const game = matches[channel.id]
 
   if (game._ai.bot && (game.game.turnCounter & 1) === game._ai.bot - 1) {
-console.log('doing ai stuff')
     suggest(game.game, game._ai.difficulty).then(bestMove => {
-console.log('got a move to play')
-    if (bestMove & (0b11 << 8)) {
-      const orientation = (bestMove & (1 << 8)) ? 'h' : 'v'
-      const row = 9 - (bestMove & 0b00001111)
-      const col = String.fromCharCode(97 + ((bestMove & 0b11110000) >> 4))
-      channel.send(`~/go move W${col}${row}${orientation}`)
-    } else {
-      const row = 9 - (bestMove & 0b00001111)
-      const col = String.fromCharCode(97 + ((bestMove & 0b11110000) >> 4))
-      channel.send(`~/go move ${col}${row}`)
-    } })
+      if (bestMove & (0b11 << 8)) {
+        const orientation = (bestMove & (1 << 8)) ? 'h' : 'v'
+        const row = 8 - (bestMove & 0b00001111)
+        const col = String.fromCharCode(97 + ((bestMove & 0b11110000) >> 4))
+        channel.send(`~/go move W${col}${row}${orientation}`)
+      } else {
+        const row = 9 - (bestMove & 0b00001111)
+        const col = String.fromCharCode(97 + ((bestMove & 0b11110000) >> 4))
+        channel.send(`~/go move ${col}${row}`)
+      }
+    })
   }
 }
 
