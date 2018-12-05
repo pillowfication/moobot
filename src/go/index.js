@@ -142,11 +142,17 @@ module.exports = function go (client) {
               if (matchMovePlayer) {
                 const c = matchMovePlayer[1].charCodeAt(0) - 97
                 const r = 9 - Number(matchMovePlayer[2])
+                let success = false
                 try {
                   matches[message.channel.id].game.makeMove(
                     player,
                     { type: Game2P.MOVE_PLAYER, r, c }
                   )
+                  success = true
+                } catch (error) {
+                  message.channel.send(error.message)
+                }
+                if (success) {
                   sendBoard(message.channel)
 
                   const game = matches[message.channel.id].game
@@ -160,8 +166,6 @@ module.exports = function go (client) {
                     message.channel.send(`${winner} wins!`)
                     delete matches[message.channel.id]
                   }
-                } catch (error) {
-                  message.channel.send(error.message)
                 }
               }
 
