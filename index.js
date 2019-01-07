@@ -4,6 +4,7 @@ const client = new Discord.Client()
 require('./src/eorzean')(client)
 require('./src/eval')(client)
 require('./src/go')(client)
+require('./src/mathjax')(client)
 require('./src/moo')(client)
 // require('./src/raid')(client)
 
