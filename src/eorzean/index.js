@@ -1,21 +1,26 @@
-const path = require('path')
-const ttf = path.join(__dirname, './EorzeaExtended.ttf')
-const textToSvg = require('text-to-svg').loadSync(ttf)
-const svgToPng = require('svg2png')
-
-const options = { fontSize: '48', anchor: 'top', attributes: { stroke: 'black', fill: 'white' } }
-async function textToPng (text) {
-  const svg = textToSvg.getSVG(text, options)
-  const png = await svgToPng(svg)
-  return png
-}
+const Discord = require('discord.js')
+const typeset = require('./typeset')
 
 module.exports = function eorzean (client) {
+  const commandRegex = /^~\/eorzean\b/
+  const textRegex = /^~\/eorzean\s+(.*)\s*$/
+
   client.on('message', message => {
-    if (message.content.startsWith('~/eorzean ')) {
-      const text = message.content.slice(10).trim()
-      textToPng(text)
-        .then(buffer => message.channel.send(undefined, { files: [ { attachment: buffer } ] }))
+    if (message.author.bot || !commandRegex.test(message.content)) {
+      return
     }
+
+    let text = message.content.match(textRegex)
+    if (!text || !(text = text[1])) {
+      return message.channel.send('No text found to typeset. Use `~/eorzean Your text here`.')
+    }
+
+    typeset(text)
+      .then(buffer =>
+        message.channel.send(new Discord.Attachment(buffer))
+      )
+      .catch(err => {
+        message.channel.send(`\`\`\`${err.message}\`\`\``)
+      })
   })
 }
