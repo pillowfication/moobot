@@ -139,7 +139,8 @@ function getDistP1 (game) {
 }
 
 function getScore (game) {
-  return (-getDistP0(game) + getDistP1(game)) * 1000000 + (game.player0Walls - game.player1Walls)
+  return (-getDistP0(game) + getDistP1(game)) * 1000000 +
+    (game.player0Walls - game.player1Walls)
 }
 
 function canPlaceWall (game, wall) {

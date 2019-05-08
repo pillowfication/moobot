@@ -37,7 +37,7 @@ module.exports = function _eval (client) {
     const isAdmin = message.author.id === '144761456645242880'
     const context = getContext(message.channel.id)
     const code = match[1] || match[2] || match[3]
-    const result = context.eval(code, isAdmin ? Object.assign({}, global, { message }) : {})
+    const result = context.eval(code, isAdmin ? { ...global, message } : {})
 
     return message.channel.send(
       result.prettyOutput.length > MAX_RESPONSE_LENGTH
