@@ -10,7 +10,7 @@ const { State, Role, Vote } = SecretHitler
 class AssertionError extends Error {}
 
 module.exports = function secretHitler (client) {
-  const command = client.config.commandPrefix + client.config.commandSecretHitler
+  const command = '~/sh'
   const participationEmoji = '✅'
   const voteYesEmoji = '✅'
   const voteNoEmoji = '❌'
