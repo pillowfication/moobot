@@ -83,11 +83,11 @@ module.exports = function secretHitler (client) {
           }
 
           const players = participationReaction.users.filter(user => !user.bot)
-          // await assert(players.size >= 5,
-          //   `Only ${players.size} ${players.size === 1 ? 'user has' : 'users have'} joined the match, and at least 5 are needed.\n` +
-          //   'Game has not been started.\n' +
-          //   `\`\`\`\n${players.map(user => user.tag).join('\n')}\n\`\`\``
-          // )
+          await assert(players.size >= 5,
+            `Only ${players.size} ${players.size === 1 ? 'user has' : 'users have'} joined the match, and at least 5 are needed.\n` +
+            'Game has not been started.\n' +
+            `\`\`\`\n${players.map(user => user.tag).join('\n')}\n\`\`\``
+          )
           await assert(players.size <= 10,
             `${players.size} users have joined the match, but at most 10 can play.\n` +
             'Game has not been started.\n' +
