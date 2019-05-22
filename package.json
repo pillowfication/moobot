@@ -24,6 +24,7 @@
     "bufferutil": "^4.0.1",
     "canvas": "^2.4.1",
     "cron": "^1.7.1",
+    "cronstrue": "^1.68.0",
     "discord-plugins": "0.0.4",
     "discord.js": "^11.4.2",
     "mathjax-node": "^2.1.1",
