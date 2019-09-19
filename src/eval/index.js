@@ -4,7 +4,7 @@ const MAX_RESPONSE_LENGTH = 250
 
 module.exports = function _eval (client) {
   const commandRegex = /^~\/eval\b/
-  const resetRegex = /^~\/eval\s+reset/
+  const resetRegex = /^~\/eval\s+reset\b/
   const evalRegex = /`([\s\S]*?[^`])`(?:[^`]|$)|``([\s\S]*?[^`])``(?:[^`]|$)|```(?:\S+\n(?=[\s\S]))?([\s\S]*?[^`])```/
 
   const contexts = {}
