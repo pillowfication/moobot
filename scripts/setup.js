@@ -26,7 +26,7 @@ prompt.get(schema, (error, result) => {
   }
 
   try {
-    jsonfile.writeFileSync(CONFIG_PATH, result, { spaces: 2 })
+    jsonfile.writeFileSync(CONFIG_PATH, { ...result, admins: [] }, { spaces: 2 })
     console.log(`Config created at '${CONFIG_PATH}'.`)
   } catch (error) {
     console.log(`Error creating '${CONFIG_PATH}'. Please try again.`)

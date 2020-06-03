@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const typeset = require('./typeset')
 
-module.exports = function eorzean (client) {
+function eorzean (client) {
   const commandRegex = /^~\/eorzean\b/
   const textRegex = /^~\/eorzean\s+(.*)\s*$/
 
@@ -16,11 +16,9 @@ module.exports = function eorzean (client) {
     }
 
     typeset(text)
-      .then(buffer =>
-        message.channel.send(new Discord.Attachment(buffer))
-      )
-      .catch(err => {
-        message.channel.send(`\`\`\`${err.message}\`\`\``)
-      })
+      .then(buffer => message.channel.send(new Discord.MessageAttachment(buffer)))
+      .catch(err => message.channel.send(`\`\`\`${err.message}\`\`\``))
   })
 }
+
+module.exports = eorzean

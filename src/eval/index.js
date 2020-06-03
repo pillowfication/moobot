@@ -1,8 +1,22 @@
 const { DiscordVM } = require('discord-plugins').eval
+const isAdmin = require('../isAdmin')
 
 const MAX_RESPONSE_LENGTH = 250
+const GLOBALS = {
+  console,
+  process,
+  Buffer,
+  clearImmediate,
+  clearInterval,
+  clearTimeout,
+  setImmediate,
+  setInterval,
+  setTimeout,
+  module,
+  require
+}
 
-module.exports = function _eval (client) {
+function _eval (client) {
   const commandRegex = /^~\/eval\b/
   const resetRegex = /^~\/eval\s+reset\b/
   const evalRegex = /`([\s\S]*?[^`])`(?:[^`]|$)|``([\s\S]*?[^`])``(?:[^`]|$)|```(?:\S+\n(?=[\s\S]))?([\s\S]*?[^`])```/
@@ -34,16 +48,18 @@ module.exports = function _eval (client) {
       return message.channel.send('No code found to eval. Wrap expressions in a `code block`.')
     }
 
-    const isAdmin = message.author.id === '144761456645242880'
     const context = getContext(message.channel.id)
     const code = match[1] || match[2] || match[3]
-    const result = context.eval(code, isAdmin ? { ...global, message } : {})
+    const result = context.eval(code, isAdmin(message.author) ? { ...GLOBALS, message } : {})
+    const prettyOutput = result.prettyOutput.replace(new RegExp(client.token, 'g'), 'moo')
 
     return message.channel.send(
-      result.prettyOutput.length > MAX_RESPONSE_LENGTH
-        ? result.prettyOutput.substring(0, MAX_RESPONSE_LENGTH) + '...'
-        : result.prettyOutput,
+      prettyOutput.length > MAX_RESPONSE_LENGTH
+        ? prettyOutput.substring(0, MAX_RESPONSE_LENGTH) + '...'
+        : prettyOutput,
       { code: 'js' }
     )
   })
 }
+
+module.exports = _eval

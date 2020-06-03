@@ -4,7 +4,7 @@ const sharp = require('sharp')
 const EX = 12
 const PADDING = 5
 
-module.exports = function typeset (math) {
+function typeset (math) {
   return new Promise((resolve, reject) => {
     mathjax.typeset({
       math: math,
@@ -25,3 +25,5 @@ module.exports = function typeset (math) {
       .toBuffer()
   )
 }
+
+module.exports = typeset

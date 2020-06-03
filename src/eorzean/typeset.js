@@ -11,8 +11,10 @@ const options = {
   }
 }
 
-module.exports = function typeset (text) {
+function typeset (text) {
   return sharp(Buffer.from(textToSvg.getSVG(text, options)))
     .png()
     .toBuffer()
 }
+
+module.exports = typeset

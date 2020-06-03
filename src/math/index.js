@@ -3,7 +3,7 @@ const typeset = require('./typeset')
 
 const MAX_MATCHES = 5
 
-module.exports = function math (client) {
+function math (client) {
   const commandRegex = /^~\/math\b/
 
   client.on('message', async message => {
@@ -15,16 +15,11 @@ module.exports = function math (client) {
     let match
     const mathRegex = /`([\s\S]*?[^`])`(?:[^`]|$)|``([\s\S]*?[^`])``(?:[^`]|$)|```(?:\S+\n(?=[\s\S]))?([\s\S]*?[^`])```/g
 
-    while (count < MAX_MATCHES && (match = mathRegex.exec(message.content))) {
+    while (count++ < MAX_MATCHES && (match = mathRegex.exec(message.content))) {
       const math = match[1] || match[2] || match[3]
       await typeset(math)
-        .then(buffer =>
-          message.channel.send(new Discord.Attachment(buffer))
-        )
-        .catch(err => {
-          message.channel.send(`\`\`\`${err.message}\`\`\``)
-        })
-      ++count
+        .then(buffer => message.channel.send(new Discord.MessageAttachment(buffer)))
+        .catch(err => message.channel.send(`\`\`\`${err.message}\`\`\``))
     }
 
     if (count === 0) {
@@ -32,3 +27,5 @@ module.exports = function math (client) {
     }
   })
 }
+
+module.exports = math

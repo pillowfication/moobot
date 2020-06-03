@@ -3,7 +3,7 @@ const construe = require('cronstrue')
 const db = require('./db')
 const parseArgs = require('../parseArgs')
 
-module.exports = function cron (client) {
+function cron (client) {
   const command = '~/cron'
   const jobs = {}
 
@@ -112,3 +112,5 @@ module.exports = function cron (client) {
     })
   })
 }
+
+module.exports = cron
