@@ -51,7 +51,7 @@ function cron (client) {
     ;(async () => {
       switch (args[1]) {
         case 'parse': {
-          const [ ,, cronPattern ] = args
+          const [,, cronPattern] = args
           let cronString
           try {
             cronString = construe.toString(cronPattern)
@@ -62,7 +62,7 @@ function cron (client) {
           break
         }
         case 'add': {
-          const [ ,, cronPattern, cronMessage ] = args
+          const [,, cronPattern, cronMessage] = args
           let cronString
           try {
             cronString = construe.toString(cronPattern)
@@ -83,7 +83,7 @@ function cron (client) {
           break
         }
         case 'delete': {
-          const [ ,, jobId ] = args
+          const [,, jobId] = args
           const jobs = await db.getAllJobs(channel.id)
           const job = jobs.find(job => job.id === +jobId)
           console.log(jobId, jobs)

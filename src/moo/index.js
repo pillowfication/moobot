@@ -5,9 +5,9 @@ const isAdmin = require('../isAdmin')
 const DB_PATH = path.resolve(__dirname, '../../data/moo.json')
 
 const db = new JsonDB()
+db.on('ready', () => console.log(`moo json-db connected to ${db.path}`))
+db.on('error', err => console.error(err))
 db.connect(DB_PATH)
-  .then(() => console.log(`moo json-db connected to ${db.path}`))
-  .catch(() => console.error(`error connecting to ${DB_PATH}`))
 
 function moo (client) {
   const mooRegex = /\b(?:moo+|cows?)\b/i
@@ -27,7 +27,7 @@ function moo (client) {
     try {
       (async () => {
         const { author } = message
-        const stats = await db.get([ author.id ]) || {
+        const stats = await db.get([author.id]) || {
           messages: 0,
           moos: 0,
           moosTriggered: 0
@@ -43,7 +43,7 @@ function moo (client) {
           avatar: author.avatar
         }
 
-        await db.set([ author.id ], stats)
+        await db.set([author.id], stats)
       })()
     } catch (_) {}
   })
