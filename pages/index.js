@@ -35,7 +35,7 @@ const Index = () => {
         {data.map((datum, index) =>
           <TableRow key={index}>
             <TableCell>#{index + 1}</TableCell>
-            <TableCell>{datum.meta.tag}</TableCell>
+            <TableCell>{datum.meta.username}</TableCell>
             <TableCell>{datum.moos}</TableCell>
             <TableCell>{datum.moosTriggered}</TableCell>
           </TableRow>
