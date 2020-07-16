@@ -45,7 +45,9 @@ function moo (client) {
 
         await db.set([author.id], stats)
       })()
-    } catch (_) {}
+    } catch (err) {
+      console.error(err)
+    }
   })
 }
 
