@@ -1,6 +1,7 @@
 import React from 'react'
 import useSWR from 'swr'
 import unfetch from 'unfetch'
+import cn from 'classnames'
 import { makeStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import Paper from '@material-ui/core/Paper'
@@ -16,6 +17,7 @@ const fetcher = url => unfetch(url).then((res) => res.json())
 const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: theme.spacing(5),
+    marginBottom: theme.spacing(10),
     whiteSpace: 'nowrap'
   },
   headerUser: {
@@ -30,6 +32,15 @@ const useStyles = makeStyles((theme) => ({
   },
   discriminator: {
     color: '#9a9a9a'
+  },
+  numberOne: {
+    backgroundColor: '#fffdf0',
+    border: '2px solid #ffd702',
+    '& td': {
+      fontSize: '1.15em',
+      paddingTop: theme.spacing(3),
+      paddingBottom: theme.spacing(3)
+    }
   }
 }))
 
@@ -58,7 +69,7 @@ const Index = () => {
         </TableHead>
         <TableBody>
           {data.map((datum, index) =>
-            <TableRow key={index}>
+            <TableRow key={index} className={cn(index === 0 && classes.numberOne)}>
               <TableCell align='center'>
                 #{index + 1}
               </TableCell>
