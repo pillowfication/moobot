@@ -22,7 +22,7 @@ const App = ({ Component, pageProps }) => {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Container maxWidth='lg' component='main'>
+        <Container maxWidth='md' component='main'>
           <Component {...pageProps} />
         </Container>
       </ThemeProvider>
