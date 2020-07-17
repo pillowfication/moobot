@@ -34,8 +34,7 @@ const useStyles = makeStyles((theme) => ({
     color: '#9a9a9a'
   },
   numberOne: {
-    backgroundColor: '#fffdf0',
-    border: '2px solid #ffd702',
+    backgroundColor: '#e0ebff',
     '& td': {
       fontSize: '1.15em',
       paddingTop: theme.spacing(3),
