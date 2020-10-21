@@ -11,7 +11,7 @@ function cron (client) {
     const channelJobs = jobs[channelId] || (jobs[channelId] = {})
     channelJobs[jobId] = new CronJob(job.cronPattern, () => {
       (async () => {
-        const channel = client.channels.fetch(channelId)
+        const channel = await client.channels.fetch(channelId)
         channel.send(job.message)
       })()
         .catch(err => { console.error(err) })
