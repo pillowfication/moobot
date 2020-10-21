@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
-// require('./src/cron')(client)
+require('./src/cron')(client)
 require('./src/eorzean')(client)
 require('./src/eval')(client)
 // require('./src/qd')(client)
